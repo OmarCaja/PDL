@@ -65,7 +65,7 @@ comentario     "//".*
 
 %%
 /*****************************************************************************/
-int verbosidad = FALSE;                  /* Flag si se desea una traza       */
+int verbosidad = FALSE;
 
 /*****************************************************************************/
 void yyerror(const char *msg)
