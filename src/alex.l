@@ -27,8 +27,8 @@ comentario     "//".*
 "--"           { retornar (MENOSMENOS_); }
 "*"            { retornar (POR_);   }
 "/"            { retornar (DIV_);   }
-"("            { retornar (OPAR_);  }
-")"            { retornar (DIV_);   }
+"("            { retornar (PARA_);  }
+")"            { retornar (PARC_);   }
 "{"            { retornar (LLAA_);   }
 "}"            { retornar (LLAC_);   }
 "="            { retornar (IG_);   }
