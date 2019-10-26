@@ -15,48 +15,48 @@
 
 %%
 
-programa :	LLAA_ secSent LLAC_
+programa : LLAA_ secSent LLAC_
          ;
 
-secSent :	sentencia
-        |	secSent sentencia
+secSent : sentencia
+        | secSent sentencia
         ;
 
 sentencia :	declaracion
           |	instruccion
           ;
 
-declaracion :	tipoSimple ID_ PUNTCOMA_
-            |	tipoSimple ID_ IG_ constante PUNTCOMA_
-            |	tipoSimple ID_ CORA_ CTE_ CORC_ PUNTCOMA_
-            |	STRUCT_ LLAA_ listaCampos LLAC_ ID_ PUNTCOMA_
+declaracion : tipoSimple ID_ PUNTCOMA_
+            | tipoSimple ID_ IG_ constante PUNTCOMA_
+            | tipoSimple ID_ CORA_ CTE_ CORC_ PUNTCOMA_
+            | STRUCT_ LLAA_ listaCampos LLAC_ ID_ PUNTCOMA_
             ;
 
-tipoSimple  :	INT_
-            |	BOOL_
+tipoSimple  : INT_
+            | BOOL_
             ;
 
 listaCampos : tipoSimple ID_ PUNTCOMA_
             | listaCampos tipoSimple ID_ PUNTCOMA_
             ;
 
-instruccion :	LLAA_ LLAC_
-            |	LLAA_ listaInstrucciones LLAC_
-            |	instrEntrSal
-            |	instrSelect
-            |	instrIter
-            |	instrExp
+instruccion : LLAA_ LLAC_
+            | LLAA_ listaInstrucciones LLAC_
+            | instrEntrSal
+            | instrSelect
+            | instrIter
+            | instrExp
             ;
 
-listaInstrucciones  :	listaInstrucciones instruccion
+listaInstrucciones  : listaInstrucciones instruccion
                     | instruccion
                     ;
 
-instrEntrSal  :	READ_ PARA_ ID_ PARC_ PUNTCOMA_
-              |	PRINT_ PARA_ expresion PARC_ PUNTCOMA_
+instrEntrSal  : READ_ PARA_ ID_ PARC_ PUNTCOMA_
+              | PRINT_ PARA_ expresion PARC_ PUNTCOMA_
               ;
 
-instrSelect :	IF_ PARA_ expresion PARC_ instruccion ELSE_ instruccion
+instrSelect : IF_ PARA_ expresion PARC_ instruccion ELSE_ instruccion
             ;
 
 instrIter :	WHILE_ PARA_ expresion PARC_ instruccion
@@ -83,28 +83,28 @@ exprRelac :	exprAditiva
           |	exprRelac operRelac exprAditiva
           ;
 
-exprAditiva :	exprMultiplic
-            |	exprAditiva operAditivo exprMultiplic
+exprAditiva : exprMultiplic
+            | exprAditiva operAditivo exprMultiplic
             ;
 
-exprMultiplic :	exprUnaria
-              |	exprMultiplic operMultiplic exprUnaria
+exprMultiplic : exprUnaria
+              | exprMultiplic operMultiplic exprUnaria
               ;
 
-exprUnaria  :	exprSufija
-            |	operUnario exprUnaria
-            |	operIncr ID_
+exprUnaria  : exprSufija
+            | operUnario exprUnaria
+            | operIncr ID_
             ;
 
-exprSufija  :	PARA_ expresion PARC_
-            |	ID_ operIncr
-            |	ID_ CORA_ expresion CORC_
-            |	ID_
-            |	ID_ PUNTO_ ID_
-            |	constante
+exprSufija  : PARA_ expresion PARC_
+            | ID_ operIncr
+            | ID_ CORA_ expresion CORC_
+            | ID_
+            | ID_ PUNTO_ ID_
+            | constante
             ;
 
-constante :	CTE_
+constante : CTE_
           |	TRUE_
           |	FALSE_
           ;
@@ -116,8 +116,8 @@ operAsign :	IG_
           |	DIVIG_
           ;
 
-operLogico  :	ANDAND_
-            |	OROR_
+operLogico  : ANDAND_
+            | OROR_
             ;
 
 operIgual :	IGIG_
@@ -130,18 +130,18 @@ operRelac :	MAYQ_
           |	MENQIGQ_
           ;
 
-operAditivo :	MAS_
-            |	MENOS_
+operAditivo : MAS_
+            | MENOS_
             ;
 
-operMultiplic :	POR_
-              |	DIV_
-              |	PORCEN_
+operMultiplic : POR_
+              | DIV_
+              | PORCEN_
               ;
 
-operUnario  :	MAS_
-            |	MENOS_
-            |	NOT_
+operUnario  : MAS_
+            | MENOS_
+            | NOT_
             ;
 
 operIncr  :	MASMAS_
