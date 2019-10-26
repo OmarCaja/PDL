@@ -8,7 +8,7 @@
 %token PARA_ PARC_ CORA_ CORC_ LLAA_ LLAC_
 %token ANDAND_ OROR_ MAYQ_ MAYQIGQ_ MENQ_ MENQIGQ_ NOT_
 %token PUNTCOMA_ PUNTO_
-%token INT_ BOOL_
+%token INT_ BOOL_ TRUE_ FALSE_
 %token READ_ PRINT_
 %token IF_ ELSE_ WHILE_ STRUCT_
 %token CTE_ ID_ REAL_

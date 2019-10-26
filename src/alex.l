@@ -53,6 +53,8 @@ comentario     "//".*
 "."            { retornar (PUNTO_);   }
 "int"          { retornar (INT_);   }
 "bool"         { retornar (BOOL_);   }
+"true"         { retornar (TRUE_);   }
+"false"         { retornar (FALSE_);   }
 "read"         { retornar (READ_);   }
 "print"        { retornar (PRINT_);   }
 "if"           { retornar (IF_);   }
