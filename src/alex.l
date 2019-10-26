@@ -41,9 +41,9 @@ comentario     "//".*
 "&&"           { retornar (ANDAND_);   }
 "||"           { retornar (OROR_);   }
 ">"            { retornar (MAYQ_);   }
-">="           { retornar (MAYQIG_);   }
+">="           { retornar (MAYQIGQ_);   }
 "<"            { retornar (MENQ_);   }
-"<="           { retornar (MENQIG_);   }
+"<="           { retornar (MENQIGQ_);   }
 "%"            { retornar (PORCEN_);   }
 "!"            { retornar (NOT_);   }
 ";"            { retornar (PUNTCOMA_);   }
