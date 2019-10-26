@@ -4,7 +4,7 @@
 #include "header.h"
 #include "asin.h"
 
-#define  retornar(x) {if (verbosidad) ECHO;}
+#define  retornar(x) {if (verbosidad) ECHO; return(x);}
 %}
 
 %option noinput       
