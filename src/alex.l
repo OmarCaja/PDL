@@ -50,6 +50,7 @@ comentario     "//".*
 "%"            { retornar (PORCEN_);   }
 "!"            { retornar (NOT_);   }
 ";"            { retornar (PUNTCOMA_);   }
+"."            { retornar (PUNTO_);   }
 "int"          { retornar (INT_);   }
 "bool"         { retornar (BOOL_);   }
 "read"         { retornar (READ_);   }
