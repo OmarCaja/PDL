@@ -6,10 +6,7 @@
 
 #define  retornar(x) {if (verbosidad) ECHO;}
 %}
-/*-----------------------------------------------------------------------------
-  Estas opciones evitan "warnings" innecesarios y permiten obtener el
-  numero de linea actual en la variable global "yylineno".
------------------------------------------------------------------------------*/
+
 %option noinput       
 %option nounput       
 %option yylineno  
