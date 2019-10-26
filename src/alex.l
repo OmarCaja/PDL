@@ -27,10 +27,6 @@ comentario     "//".*
 "--"           { retornar (MENOSMENOS_); }
 "*"            { retornar (POR_);   }
 "/"            { retornar (DIV_);   }
-"("            { retornar (PARA_);  }
-")"            { retornar (PARC_);   }
-"{"            { retornar (LLAA_);   }
-"}"            { retornar (LLAC_);   }
 "="            { retornar (IG_);   }
 "=="           { retornar (IGIG_);   }
 "!="           { retornar (NIG_);   }
@@ -38,6 +34,10 @@ comentario     "//".*
 "-="           { retornar (MENOSIG_);   }
 "*="           { retornar (PORIG_);   }
 "/="           { retornar (DIVIG_);   }
+"("            { retornar (PARA_);  }
+")"            { retornar (PARC_);   }
+"{"            { retornar (LLAA_);   }
+"}"            { retornar (LLAC_);   }
 "&&"           { retornar (ANDAND_);   }
 "||"           { retornar (OROR_);   }
 ">"            { retornar (MAYQ_);   }
