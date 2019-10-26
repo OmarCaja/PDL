@@ -16,7 +16,7 @@
 %%
 
 programa :	LLAA_ secSent LLAC_
-      ;
+         ;
 
 secSent :	sentencia
         |	secSent sentencia
