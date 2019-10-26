@@ -14,7 +14,7 @@
 delimitador    [ \t\n]+
 digito         [0-9]
 entero         {digito}+
-real           {digito}+"."{digito}+
+real           {digito}+"." | "."{digito}+ | {digito}+"."{digito}+
 idSymbol       [a-zA-Z0-9_]
 id             [a-zA-Z]{idSymbol}*
 comentario     "//".*
