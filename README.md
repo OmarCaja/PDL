@@ -1,2 +1,2 @@
 # PDL
-Public repository fro PDL subject
+Public repository for PDL subject
