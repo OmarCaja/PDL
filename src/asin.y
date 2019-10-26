@@ -48,8 +48,8 @@ instruccion : LLAA_ LLAC_
             | instrExp
             ;
 
-listaInstrucciones  : listaInstrucciones instruccion
-                    | instruccion
+listaInstrucciones  : instruccion
+                    | listaInstrucciones instruccion
                     ;
 
 instrEntrSal  : READ_ PARA_ ID_ PARC_ PUNTCOMA_
