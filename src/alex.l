@@ -20,6 +20,7 @@ id             [a-zA-Z]{idSymbol}*
 comentario     "//".*
 
 %%
+
 {delimitador}  { if (verbosidad) ECHO; }
 "+"	           { retornar (MAS_);   }
 "++"	         { retornar (MASMAS_);   }
