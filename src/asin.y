@@ -36,6 +36,10 @@ tipoSimple  :	INT_
             |	BOOL_
             ;
 
+listaCampos : tipoSimple ID_ PUNTCOMA_
+            | listaCampos tipoSimple ID_ PUNTCOMA_
+            ;
+
 instruccion :	LLAA_ LLAC_
             |	LLAA_ listaInstrucciones LLAC_
             |	instrEntrSal
