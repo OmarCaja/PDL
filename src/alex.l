@@ -37,6 +37,8 @@ comentario     "//".*
 "/="           { retornar (DIVIG_);   }
 "("            { retornar (PARA_);  }
 ")"            { retornar (PARC_);   }
+"["            { retornar (CORA_);   }
+"]"            { retornar (CORC_);   }
 "{"            { retornar (LLAA_);   }
 "}"            { retornar (LLAC_);   }
 "&&"           { retornar (ANDAND_);   }
