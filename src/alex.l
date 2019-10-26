@@ -23,7 +23,7 @@ comentario     "//".*
 
 {delimitador}  { if (verbosidad) ECHO; }
 "+"	           { retornar (MAS_);   }
-"++"	         { retornar (MASMAS_);   }
+"++"	       { retornar (MASMAS_);   }
 "-"            { retornar (MENOS_); }
 "--"           { retornar (MENOSMENOS_); }
 "*"            { retornar (POR_);   }
@@ -54,7 +54,7 @@ comentario     "//".*
 "int"          { retornar (INT_);   }
 "bool"         { retornar (BOOL_);   }
 "true"         { retornar (TRUE_);   }
-"false"         { retornar (FALSE_);   }
+"false"        { retornar (FALSE_);   }
 "read"         { retornar (READ_);   }
 "print"        { retornar (PRINT_);   }
 "if"           { retornar (IF_);   }
@@ -65,6 +65,6 @@ comentario     "//".*
 {id}           { retornar (ID_);   }
 {real}         { retornar (REAL_);   }
 {comentario}   { if (verbosidad) ECHO; }
-.	             { yyerror("Caracter desconocido"); }
+.	           { yyerror("Caracter desconocido"); }
 
 %%
