@@ -11,7 +11,7 @@
 %token INT_ BOOL_ TRUE_ FALSE_
 %token READ_ PRINT_
 %token IF_ ELSE_ WHILE_ STRUCT_
-%token CTE_ ID_ REAL_
+%token CTE_ ID_
 
 %%
 
