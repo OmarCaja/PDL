@@ -7,20 +7,21 @@
 SRCDIR = src
 INCDIR = include
 # Opciones de compilacion
-COPT = -Wall
+COPT = -Wall -g
 CLIB = -lfl
-OBJS = ./alex.o  ./asin.o ./principal.o 
+OBJS = ./alex.o  ./asin.o ./main.o
+YACCFLAGS = --debug --verbose -Wall
 #
-cmc:	$(OBJS)
-	gcc  $(OBJS)  -I$(INCDIR)  $(COPT)  $(CLIB) -o cmc
-principal.o: $(SRCDIR)/principal.c
-	gcc  -I$(INCDIR) $(COPT) -c $(SRCDIR)/principal.c
+menoscc:	$(OBJS)
+	gcc  $(OBJS)  -I$(INCDIR)  $(COPT)  $(CLIB) -o menoscc
+main.o: $(SRCDIR)/main.c
+	gcc  -I$(INCDIR) $(COPT) -c $(SRCDIR)/main.c
 asin.o:	asin.c
 	gcc  -I$(INCDIR) $(COPT) -c asin.c
 alex.o:	alex.c asin.c
 	gcc  -I$(INCDIR) $(COPT) -c alex.c
 asin.c:	$(SRCDIR)/asin.y
-	bison -oasin.c  -d $(SRCDIR)/asin.y
+	bison $(YACCFLAGS) -oasin.c  -d $(SRCDIR)/asin.y
 	mv ./asin.h ./include	
 alex.c:	$(SRCDIR)/alex.l 
 	flex -oalex.c $(SRCDIR)/alex.l 
