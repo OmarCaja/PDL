@@ -63,7 +63,7 @@ comentario     "//".*
 "struct"       { retornar (STRUCT_);   }
 {entero}       { retornar (CTE_);   }
 {id}           { retornar (ID_);   }
-{real}         { retornar (REAL_);   }
+{real}         { retornar (CTE_);   }
 {comentario}   { if (verbosidad) ECHO; }
 .	           { yyerror("Caracter desconocido"); }
 
