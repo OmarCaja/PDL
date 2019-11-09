@@ -7,13 +7,27 @@
 #include "header.h"
 %}
 
+%union {
+int vent;
+string nom;
+int tipo;
+typedef struct{
+    int tipo;
+    int valor;
+}cte;
+
+}
+
+
 %token MAS_ MENOS_ POR_ DIV_ MOD_
 %token OPAR_ CPAR_ OBRA_ CBRA_ OCUR_ CCUR_
 %token ASIG_ MASASIG_ MENOSASIG_ PORASIG_ DIVASIG_
 %token AND_ OR_ IGUAL_ DIFERENTE_ MAYOR_ MENOR_ MAYORIGUAL_ MENORIGUAL_ NEG_
-%token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ VERDADERO_ FALSO_
-%token INSTREND_ SEP_ INC_ DEC_ ID_ CTE_
-
+%token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ 
+%token INSTREND_ SEP_ INC_ DEC_ CTE_
+%token <nom> VERDADERO_ FALSO_ ID_
+%type <cte> constante
+%type <tipo> tipoSimple
 %%
 
 programa : OCUR_ secuenciaSentencias CCUR_
@@ -27,8 +41,8 @@ sentencia : declaracion
           | instruccion
           ;  
 
-declaracion : tipoSimple ID_ INSTREND_
-            | tipoSimple ID_ ASIG_ constante INSTREND_
+declaracion : tipoSimple ID_ INSTREND_  
+            | tipoSimple ID_ ASIG_ constante INSTREND_ 
             | tipoSimple ID_ OBRA_ CTE_ CBRA_ INSTREND_
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             ;
@@ -107,8 +121,16 @@ expresionSufija : OPAR_ expresion CPAR_
                 ;
 
 constante : CTE_
-          | VERDADERO_
+          | VERDADERO_ 
+          {
+              $$.tipo = T_LOGICO;
+              $$.valor = 1;
+          }
           | FALSO_
+          {
+              $$.tipo = T_LOGICO;
+              $$.valor = 0;
+          }
           ;  
 
 operadorAsignacion : ASIG_
