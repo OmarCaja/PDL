@@ -28,8 +28,50 @@ sentencia   : declaracion
             ;  
 
 declaracion : tipoSimple ID_ INSTREND_
+                {
+                    if ($1 == T_ENTERO) {
+                        if (!insTSimpleTDS($2, T_ENTERO, dvar, -1)) {
+                            yyerror ("Identificador repetido");
+                        }
+                        else dvar += TALLA_TIPO_SIMPLE;
+                    }
+
+                    if ($1 == T_LOGICO) {
+                        if (!insTSimpleTDS($2, T_LOGICO, dvar, -1)) {
+                            yyerror ("Identificador repetido");
+                        }
+                        else dvar += TALLA_TIPO_SIMPLE;
+                    }
+                }
             | tipoSimple ID_ ASIG_ constante INSTREND_
+                {
+                    if ($1 == T_ENTERO) {
+                        if (!insTSimpleTDS($2, T_ENTERO, dvar, -1)) {
+                            yyerror ("Identificador repetido");
+                        }
+                        else dvar += TALLA_TIPO_SIMPLE;
+                    }
+
+                    if ($1 == T_LOGICO) {
+                        if (!insTSimpleTDS($2, T_LOGICO, dvar, -1)) {
+                            yyerror ("Identificador repetido");
+                        }
+                        else dvar += TALLA_TIPO_SIMPLE;
+                    }
+                }
             | tipoSimple ID_ OBRA_ CTE_ CBRA_ INSTREND_
+                {
+                    int numelem = $4;
+                    if ($4 <= 0) {
+                        yyerror("Talla inapropiada del array");
+                        numelem = 0;
+                    }
+                    int refe = insTdA($1, numelem);
+                    if (!insTdS($2, T_ARRAY, dvar, refe)) {
+                        yyerror ("Identificador repetido");
+                    }
+                    else dvar += numelem * TALLA_TIPO_SIMPLE;
+                }
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             ;
 
