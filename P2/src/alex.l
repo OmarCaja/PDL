@@ -6,6 +6,7 @@
 #include <string.h>
 #include "header.h"
 #include "asin.h"
+#include "libtds.h"
 
 #define retornar(x) {if (verbosidad) ECHO; return(x); }
 %}
@@ -67,7 +68,7 @@ identificador  [a-zA-Z][a-zA-Z0-9_]*
 "false"                    { retornar (FALSO_); }
 {delimitador}              { if (verbosidad) ECHO; }
 {identificador}            { retornar (ID_); }
-{numero}                   { yylval.valorCte = atoi(yytext); retornar (CTE_); }
+{numero}                   { yylval.attrCte.valor = atoi(yytext); yylval.attrCte.tipo = T_ENTERO; retornar (CTE_); }
 {comentario}               { if (verbosidad) ECHO; }
 .	                       { yyerror("Caracter desconocido"); }
 

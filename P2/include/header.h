@@ -25,3 +25,10 @@ extern int numErrores;              /* Contador del numero de errores        */
 
 #endif  /* _HEADER_H */
 /*****************************************************************************/
+
+typedef struct
+{
+    int tipo;
+    int valor;
+} constante;
+

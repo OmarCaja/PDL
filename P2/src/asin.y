@@ -9,7 +9,7 @@
 
 %union
 {
-    int valorCte;
+    constante attrCte;
 }
 
 %token MAS_ MENOS_ POR_ DIV_ MOD_
@@ -17,7 +17,9 @@
 %token ASIG_ MASASIG_ MENOSASIG_ PORASIG_ DIVASIG_
 %token AND_ OR_ IGUAL_ DIFERENTE_ MAYOR_ MENOR_ MAYORIGUAL_ MENORIGUAL_ NEG_
 %token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ VERDADERO_ FALSO_
-%token INSTREND_ SEP_ INC_ DEC_ ID_ <valorCte> CTE_
+%token INSTREND_ SEP_ INC_ DEC_ ID_ <attrCte> CTE_
+
+%type <attrCte> constante
 
 %%
 
@@ -108,12 +110,12 @@ expresionSufija : OPAR_ expresion CPAR_
                 | ID_ OBRA_ expresion CBRA_
                 | ID_
                 | ID_ SEP_ ID_
-                | constante
+                | constante { }
                 ;
 
 constante : CTE_
-          | VERDADERO_
-          | FALSO_
+          | VERDADERO_ { }
+          | FALSO_ { }
           ;  
 
 operadorAsignacion : ASIG_
