@@ -23,5 +23,38 @@ extern void yyerror(const char * msg) ;   /* Tratamiento de errores          */
 extern int verbosidad;                   /* Flag si se desea una traza       */
 extern int numErrores;              /* Contador del numero de errores        */
 
+/*****************************************************************************/
+/*
+ * Constantes tipos de expresion
+ * para comprobacion de tipos
+ */
+enum expType
+{
+	EXPT_BOOL,
+	EXPT_INT,
+	EXPT_UNDEF,
+	_EXPT_NUM //Numero total de tipos
+};
+/*
+ * Literales nombres tipos
+ * por ahora definidos en main.c
+ */
+extern const char *expTypeNameStr[_EXPT_NUM];
+/*
+ * Obten nombre del tipo apartir de la constante
+ * (para mensages de debug y error)
+ */
+#define getExpTypeName( typeConst ) ( expTypeNameStr[typeConst] )
+/*
+ * t_exp
+ * atributos de una expresion
+*/
+typedef struct t_exp
+{
+	int value;
+	enum expType type;
+}t_exp;
+
 #endif  /* _HEADER_H */
 /*****************************************************************************/
+

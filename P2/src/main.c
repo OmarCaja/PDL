@@ -8,12 +8,22 @@
 
 int verbosidad = FALSE;             /* Flag si se desea una traza            */
 int numErrores = 0;                 /* Contador del numero de errores        */
+
+/**
+Literales nombres tipos
+*/
+const char *expTypeNameStr[_EXPT_NUM] =
+{
+	"bool",
+	"int",
+	"undefined",
+};
 /*****************************************************************************/
 /*  Tratamiento de errores.                                                  */
 void yyerror(const char * msg)
 {
 	numErrores++;  fflush(stdout);
-	fprintf(stdout, "[ERROR]\tError in %d: %s\n", yylineno, msg);
+	fprintf(stdout, "Error in line %d: %s\n", yylineno, msg);
 }
 /*****************************************************************************/
 void yywrap()
