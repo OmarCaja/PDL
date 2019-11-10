@@ -124,7 +124,7 @@ expresionMultiplicativa : expresionUnaria
                                         $$.valor = $1.valor / $3.valor; //divisiones por 0 ??
 
                                     case 2:
-                                        $$.valor = $1.valor % $3.valor; //divisiones por 0 ??
+                                        $$.valor = $1.valor % $3.valor; //divisiones por 0 ??, solo puede haber tipos enteros luego no tiene sentido la restriccion del documento
                                 }
                             }
                             else
