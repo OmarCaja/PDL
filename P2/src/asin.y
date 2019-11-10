@@ -36,6 +36,8 @@
 %type <cte> operadorMultiplicativo
 %type <cte> operadorAditivo
 %type <cte> operadorRelacional
+%type <cte> operadorIgualdad
+%type <cte> operadorLogico
 
 %%
 
@@ -98,10 +100,46 @@ expresion : expresionLogica
 
 expresionLogica : expresionIgualdad
                 | expresionLogica operadorLogico expresionIgualdad
+                {
+                    if ($1.tipo == $3.tipo && $1.tipo == T_LOGICO)
+                    {
+                        $$.tipo = $1.tipo;
+                        switch ($2)
+                        {
+                            case 0:
+                                $$.valor = $1.valor && $3.valor;
+
+                            case 1:
+                                $$.valor = $1.valor || $3.valor;
+                        }
+                    }
+                    else
+                    {
+                        yyerror("No se puede realizar la operacion con tipos distintos");
+                    }
+                 }
                 ;
 
 expresionIgualdad : expresionRelacional
                   | expresionIgualdad operadorIgualdad expresionRelacional
+                  {
+                    if ($1.tipo == $3.tipo && ($1.tipo == T_ENTERO || $1.tipo == T_LOGICO))
+                    {
+                        $$.tipo = T_LOGICO;
+                        switch ($2)
+                        {
+                            case 0:
+                                $$.valor = $1.valor == $3.valor;
+
+                            case 1:
+                                $$.valor = $1.valor != $3.valor;
+                        }
+                    }
+                    else
+                    {
+                        yyerror("No se puede realizar la operacion con tipos distintos");
+                    }
+                 }
                   ;  
 
 expresionRelacional : expresionAditiva
@@ -219,12 +257,12 @@ operadorAsignacion : ASIG_
                    | DIVASIG_
                    ; 
 
-operadorLogico : AND_
-               | OR_
+operadorLogico : AND_ { $$ = 0; }
+               | OR_ { $$ = 1; }
                ; 
 
-operadorIgualdad : IGUAL_
-                 | DIFERENTE_
+operadorIgualdad : IGUAL_ { $$ = 0; }
+                 | DIFERENTE_ { $$ = 1; }
                  ;   
 
 operadorRelacional : MAYOR_ { $$ = 0; }
