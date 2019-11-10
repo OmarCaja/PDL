@@ -31,9 +31,11 @@
 %type <attrCte> expresionIgualdad
 %type <attrCte> expresionLogica
 %type <attrCte> expresion
+
 %type <cte> operadorUnario
 %type <cte> operadorMultiplicativo
 %type <cte> operadorAditivo
+%type <cte> operadorRelacional
 
 %%
 
@@ -104,6 +106,30 @@ expresionIgualdad : expresionRelacional
 
 expresionRelacional : expresionAditiva
                     | expresionRelacional operadorRelacional expresionAditiva
+                    {
+                    if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
+                    {
+                        $$.tipo = T_LOGICO;
+                        switch ($2)
+                        {
+                            case 0:
+                                $$.valor = $1.valor > $3.valor;
+
+                            case 1:
+                                $$.valor = $1.valor < $3.valor;
+
+                            case 2:
+                                $$.valor = $1.valor >= $3.valor;
+                            
+                            case 3:
+                                $$.valor = $1.valor <= $3.valor;
+                        }
+                    }
+                    else
+                    {
+                        yyerror("No se puede realizar la operacion con tipos distintos");
+                    }
+                 }
                     ;
 
 expresionAditiva : expresionMultiplicativa 
@@ -201,10 +227,10 @@ operadorIgualdad : IGUAL_
                  | DIFERENTE_
                  ;   
 
-operadorRelacional : MAYOR_
-                   | MENOR_
-                   | MAYORIGUAL_
-                   | MENORIGUAL_
+operadorRelacional : MAYOR_ { $$ = 0; }
+                   | MENOR_ { $$ = 1; }
+                   | MAYORIGUAL_ { $$ = 2; }
+                   | MENORIGUAL_ { $$ = 3; }
                    ; 
 
 operadorAditivo : MAS_ { $$ = 0; }
