@@ -5,11 +5,13 @@
 #include <stdio.h>
 #include <string.h>
 #include "header.h"
+#include "libtds.h"
 %}
 
 %union
 {
     constante attrCte;
+    int cte;
 }
 
 %token MAS_ MENOS_ POR_ DIV_ MOD_
@@ -19,6 +21,7 @@
 %token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ VERDADERO_ FALSO_
 %token INSTREND_ SEP_ INC_ DEC_ ID_ <attrCte> CTE_
 
+%type <attrCte> operadorIncremento
 %type <attrCte> constante
 %type <attrCte> expresionSufija
 %type <attrCte> expresionUnaria
@@ -28,6 +31,7 @@
 %type <attrCte> expresionIgualdad
 %type <attrCte> expresionLogica
 %type <attrCte> expresion
+%type <cte> operadorUnario
 
 %%
 
@@ -109,11 +113,26 @@ expresionMultiplicativa : expresionUnaria
                         ;
 
 expresionUnaria : expresionSufija
-                | operadorUnario expresionUnaria {}
+                | operadorUnario expresionUnaria 
+                { 
+                    $$.tipo = $2.tipo;
+                    if ($2.tipo == T_ENTERO && $1 != 0)
+                    {
+                        $$.valor = $1 * $2.valor;
+                    }
+                    else if ($2.tipo == T_LOGICO && $1 == 0)
+                    {
+                        $$.valor = !$2.valor;
+                    }
+                    else
+                    {
+                        yyerror("el operador especificado no se puede aplicar a ese tipo");
+                    }
+                }
                 | operadorIncremento ID_ { }
                 ;
 
-expresionSufija : OPAR_ expresion CPAR_ { }
+expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                 | ID_ operadorIncremento { }
                 | ID_ OBRA_ expresion CBRA_ { }
                 | ID_ { }
@@ -156,12 +175,12 @@ operadorMultiplicativo : POR_
                        | MOD_
                        ;  
 
-operadorUnario     : MAS_ 
-                   | MENOS_
-                   | NEG_
+operadorUnario     : MAS_ { $$ = 1; }
+                   | MENOS_ { $$ = -1; }
+                   | NEG_ { $$ = 0; }
                    ;  
 
-operadorIncremento : INC_
-                   | DEC_
+operadorIncremento : INC_ { $$.tipo = T_ENTERO; $$.valor = 1; }
+                   | DEC_ { $$.tipo = T_ENTERO; $$.valor = -1; }
                    ;
 %%
