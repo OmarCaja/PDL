@@ -32,6 +32,7 @@
 %type <attrCte> expresionLogica
 %type <attrCte> expresion
 %type <cte> operadorUnario
+%type <cte> operadorMultiplicativo
 
 %%
 
@@ -110,6 +111,27 @@ expresionAditiva : expresionMultiplicativa
 
 expresionMultiplicativa : expresionUnaria
                         | expresionMultiplicativa operadorMultiplicativo expresionUnaria
+                        {
+                            if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
+                            {
+                                $$.tipo = $1.tipo;
+                                switch ($2)
+                                {
+                                    case 0:
+                                        $$.valor = $1.valor * $3.valor;
+
+                                    case 1:
+                                        $$.valor = $1.valor / $3.valor; //divisiones por 0 ??
+
+                                    case 2:
+                                        $$.valor = $1.valor % $3.valor; //divisiones por 0 ??
+                                }
+                            }
+                            else
+                            {
+                                yyerror("No se puede realizar la operacion con tipos distintos");
+                            }
+                        }
                         ;
 
 expresionUnaria : expresionSufija
@@ -134,7 +156,7 @@ expresionUnaria : expresionSufija
 
 expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                 | ID_ operadorIncremento { }
-                | ID_ OBRA_ expresion CBRA_ { }
+                | ID_ OBRA_ expresion CBRA_ { $$ = $3; }
                 | ID_ { }
                 | ID_ SEP_ ID_ { }
                 | constante
@@ -170,9 +192,9 @@ operadorAditivo : MAS_
                 | MENOS_
                 ;
 
-operadorMultiplicativo : POR_
-                       | DIV_
-                       | MOD_
+operadorMultiplicativo : POR_ { $$ = 0; }
+                       | DIV_ { $$ = 1; }
+                       | MOD_ { $$ = 2; }
                        ;  
 
 operadorUnario     : MAS_ { $$ = 1; }
