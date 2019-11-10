@@ -16,16 +16,16 @@
 
 %%
 
-programa : OCUR_ secuenciaSentencias CCUR_
-         ;   
+programa    : OCUR_ secuenciaSentencias CCUR_
+            ;   
 
 secuenciaSentencias : sentencia
                     | secuenciaSentencias sentencia
                     ;
 
-sentencia : declaracion
-          | instruccion
-          ;  
+sentencia   : declaracion
+            | instruccion
+            ;  
 
 declaracion : tipoSimple ID_ INSTREND_
             | tipoSimple ID_ ASIG_ constante INSTREND_
@@ -33,9 +33,9 @@ declaracion : tipoSimple ID_ INSTREND_
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             ;
 
-tipoSimple : ENTERO_
-           | BOOLEAN_
-           ; 
+tipoSimple  : ENTERO_
+            | BOOLEAN_
+            ; 
 
 listaCampos : tipoSimple ID_ INSTREND_
             | listaCampos tipoSimple ID_ INSTREND_
@@ -49,45 +49,74 @@ instruccion : OCUR_ CCUR_
             | instruccionExpresion
             ;
 
-listaInstrucciones : instruccion
-                   | listaInstrucciones instruccion
-                   ; 
+listaInstrucciones  : instruccion
+                    | listaInstrucciones instruccion
+                    ; 
 
-instruccionEntradaSalida : LEER_ OPAR_ ID_ CPAR_ INSTREND_
-                         | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
-                         ;
+instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
+                            {
+                                SIMB simb = obtTdS($3);
+                                if (simb.tipo == T_ERROR) {
+                                    yyerror("Variable no declarada");
+                                }
+                            }
+                            | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
+                            ;
 
-instruccionSeleccion : SI_ OPAR_ expresion CPAR_ instruccion SINO_ instruccion
-                     ;
+instruccionSeleccion    : SI_ OPAR_ expresion CPAR_ instruccion SINO_ instruccion
+                        ;
 
-instruccionIteracion : MIENTRAS_ OPAR_ expresion CPAR_ instruccion
-                     ;
+instruccionIteracion    : MIENTRAS_ OPAR_ expresion CPAR_ instruccion
+                        ;
 
-instruccionExpresion : expresion INSTREND_
-                     | INSTREND_
-                     ;                    
+instruccionExpresion    : expresion INSTREND_
+                        | INSTREND_
+                        ;                    
 
-expresion : expresionLogica
-          | ID_ operadorAsignacion expresion
-          | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
-          | ID_ SEP_ ID_ operadorAsignacion expresion
-          ;  
+expresion   : expresionLogica
+            | ID_ operadorAsignacion expresion
+                {
+                    SIMB simb = obtTdS($1);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
+                    }
+                }
+            | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
+                {
+                    SIMB simb = obtTdS($1);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
+                    }
+                }
+            | ID_ SEP_ ID_ operadorAsignacion expresion
+                {
+                    SIMB simb = obtTdS($1);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
+                    }
+
+                    SIMB simb = obtTdS($3);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
+                    }
+                }
+            ;  
 
 expresionLogica : expresionIgualdad
                 | expresionLogica operadorLogico expresionIgualdad
                 ;
 
-expresionIgualdad : expresionRelacional
-                  | expresionIgualdad operadorIgualdad expresionRelacional
-                  ;  
+expresionIgualdad   : expresionRelacional
+                    | expresionIgualdad operadorIgualdad expresionRelacional
+                    ;  
 
 expresionRelacional : expresionAditiva
                     | expresionRelacional operadorRelacional expresionAditiva
                     ;
 
-expresionAditiva : expresionMultiplicativa
-                 | expresionAditiva operadorAditivo expresionMultiplicativa
-                 ;
+expresionAditiva    : expresionMultiplicativa
+                    | expresionAditiva operadorAditivo expresionMultiplicativa
+                    ;
 
 expresionMultiplicativa : expresionUnaria
                         | expresionMultiplicativa operadorMultiplicativo expresionUnaria
@@ -96,57 +125,92 @@ expresionMultiplicativa : expresionUnaria
 expresionUnaria : expresionSufija
                 | operadorUnario expresionUnaria
                 | operadorIncremento ID_
+                    {
+                        SIMB simb = obtTdS($2);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+                    }
                 ;
 
 expresionSufija : OPAR_ expresion CPAR_
                 | ID_ operadorIncremento
+                    {
+                        SIMB simb = obtTdS($1);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+                    }
                 | ID_ OBRA_ expresion CBRA_
+                    {
+                        SIMB simb = obtTdS($1);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+                    }
                 | ID_
+                    {
+                        SIMB simb = obtTdS($1);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+                    }
                 | ID_ SEP_ ID_
+                    {
+                        SIMB simb = obtTdS($1);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+
+                        SIMB simb = obtTdS($3);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+                    }
                 | constante
                 ;
 
-constante : CTE_
-          | VERDADERO_
-          | FALSO_
-          ;  
+constante   : CTE_
+            | VERDADERO_
+            | FALSO_
+            ;  
 
-operadorAsignacion : ASIG_
-                   | MASASIG_
-                   | MENOSASIG_
-                   | PORASIG_
-                   | DIVASIG_
-                   ; 
+operadorAsignacion  : ASIG_
+                    | MASASIG_
+                    | MENOSASIG_
+                    | PORASIG_
+                    | DIVASIG_
+                    ; 
 
-operadorLogico : AND_
-               | OR_
-               ; 
+operadorLogico  : AND_
+                | OR_
+                ; 
 
-operadorIgualdad : IGUAL_
-                 | DIFERENTE_
-                 ;   
+operadorIgualdad    : IGUAL_
+                    | DIFERENTE_
+                    ;   
 
-operadorRelacional : MAYOR_
-                   | MENOR_
-                   | MAYORIGUAL_
-                   | MENORIGUAL_
-                   ; 
+operadorRelacional  : MAYOR_
+                    | MENOR_
+                    | MAYORIGUAL_
+                    | MENORIGUAL_
+                    ; 
 
 operadorAditivo : MAS_
                 | MENOS_
                 ;
 
-operadorMultiplicativo : POR_
-                       | DIV_
-                       | MOD_
-                       ;  
+operadorMultiplicativo  : POR_
+                        | DIV_
+                        | MOD_
+                        ;  
 
-operadorUnario     : MAS_ 
-                   | MENOS_
-                   | NEG_
-                   ;  
+operadorUnario  : MAS_ 
+                | MENOS_
+                | NEG_
+                ;  
 
-operadorIncremento : INC_
-                   | DEC_
-                   ;
+operadorIncremento  : INC_
+                    | DEC_
+                    ;
 %%
