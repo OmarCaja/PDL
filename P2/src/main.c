@@ -12,11 +12,14 @@ int numErrores = 0;                 /* Contador del numero de errores        */
 /**
 Literales nombres tipos
 */
-const char *expTypeNameStr[_EXPT_NUM] =
+const char *expTypeNameStr[] =
 {
-	"bool",
-	"int",
-	"undefined",
+	"undefined", //T_VACIO
+	"int", //T_ENTERO
+	"bool", //T_LOGICO
+	"array", //T_ARRAY
+	"struct", //T_RECORD
+	"error", //T_ERROR
 };
 /*****************************************************************************/
 /*  Tratamiento de errores.                                                  */

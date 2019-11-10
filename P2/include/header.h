@@ -24,22 +24,12 @@ extern int verbosidad;                   /* Flag si se desea una traza       */
 extern int numErrores;              /* Contador del numero de errores        */
 
 /*****************************************************************************/
-/*
- * Constantes tipos de expresion
- * para comprobacion de tipos
- */
-enum expType
-{
-	EXPT_BOOL,
-	EXPT_INT,
-	EXPT_UNDEF,
-	_EXPT_NUM //Numero total de tipos
-};
+
 /*
  * Literales nombres tipos
  * por ahora definidos en main.c
  */
-extern const char *expTypeNameStr[_EXPT_NUM];
+extern const char *expTypeNameStr[];
 /*
  * Obten nombre del tipo apartir de la constante
  * (para mensages de debug y error)
@@ -52,7 +42,7 @@ extern const char *expTypeNameStr[_EXPT_NUM];
 typedef struct t_exp
 {
 	int value;
-	enum expType type;
+	int type;
 }t_exp;
 
 #endif  /* _HEADER_H */
