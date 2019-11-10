@@ -33,6 +33,7 @@
 %type <attrCte> expresion
 %type <cte> operadorUnario
 %type <cte> operadorMultiplicativo
+%type <cte> operadorAditivo
 
 %%
 
@@ -107,6 +108,24 @@ expresionRelacional : expresionAditiva
 
 expresionAditiva : expresionMultiplicativa 
                  | expresionAditiva operadorAditivo expresionMultiplicativa
+                 {
+                    if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
+                    {
+                        $$.tipo = $1.tipo;
+                        switch ($2)
+                        {
+                            case 0:
+                                $$.valor = $1.valor + $3.valor;
+
+                            case 1:
+                                $$.valor = $1.valor - $3.valor;
+                        }
+                    }
+                    else
+                    {
+                        yyerror("No se puede realizar la operacion con tipos distintos");
+                    }
+                 }
                  ;
 
 expresionMultiplicativa : expresionUnaria
@@ -188,8 +207,8 @@ operadorRelacional : MAYOR_
                    | MENORIGUAL_
                    ; 
 
-operadorAditivo : MAS_
-                | MENOS_
+operadorAditivo : MAS_ { $$ = 0; }
+                | MENOS_ { $$ = 1; }
                 ;
 
 operadorMultiplicativo : POR_ { $$ = 0; }
