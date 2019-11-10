@@ -1,6 +1,6 @@
 #!/bin/bash
 : ${MENOSCCFLAGS:= ""}
-: ${TESTDIR:= "./tmp"}
+: ${TESTDIR:= "./tmp/tests_asignatura"}
 printf "[INFO]\tset env var TESTDIR with desired tests directory\n"
 printf "[INFO]\tTESTSDIR is ./tmp by default\n"
 printf "[INFO]\tset env var MENOSCCFLAGS with -d to show the parsing trace\n"
