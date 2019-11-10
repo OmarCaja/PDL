@@ -20,6 +20,14 @@
 %token INSTREND_ SEP_ INC_ DEC_ ID_ <attrCte> CTE_
 
 %type <attrCte> constante
+%type <attrCte> expresionSufija
+%type <attrCte> expresionUnaria
+%type <attrCte> expresionMultiplicativa
+%type <attrCte> expresionAditiva
+%type <attrCte> expresionRelacional
+%type <attrCte> expresionIgualdad
+%type <attrCte> expresionLogica
+%type <attrCte> expresion
 
 %%
 
@@ -70,14 +78,14 @@ instruccionSeleccion : SI_ OPAR_ expresion CPAR_ instruccion SINO_ instruccion
 instruccionIteracion : MIENTRAS_ OPAR_ expresion CPAR_ instruccion
                      ;
 
-instruccionExpresion : expresion INSTREND_
+instruccionExpresion : expresion INSTREND_ {}
                      | INSTREND_
                      ;                    
 
 expresion : expresionLogica
-          | ID_ operadorAsignacion expresion
-          | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
-          | ID_ SEP_ ID_ operadorAsignacion expresion
+          | ID_ operadorAsignacion expresion { }
+          | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion { }
+          | ID_ SEP_ ID_ operadorAsignacion expresion { }
           ;  
 
 expresionLogica : expresionIgualdad
@@ -92,7 +100,7 @@ expresionRelacional : expresionAditiva
                     | expresionRelacional operadorRelacional expresionAditiva
                     ;
 
-expresionAditiva : expresionMultiplicativa
+expresionAditiva : expresionMultiplicativa 
                  | expresionAditiva operadorAditivo expresionMultiplicativa
                  ;
 
@@ -101,16 +109,16 @@ expresionMultiplicativa : expresionUnaria
                         ;
 
 expresionUnaria : expresionSufija
-                | operadorUnario expresionUnaria
-                | operadorIncremento ID_
+                | operadorUnario expresionUnaria {}
+                | operadorIncremento ID_ { }
                 ;
 
-expresionSufija : OPAR_ expresion CPAR_
-                | ID_ operadorIncremento
-                | ID_ OBRA_ expresion CBRA_
-                | ID_
-                | ID_ SEP_ ID_
-                | constante { }
+expresionSufija : OPAR_ expresion CPAR_ { }
+                | ID_ operadorIncremento { }
+                | ID_ OBRA_ expresion CBRA_ { }
+                | ID_ { }
+                | ID_ SEP_ ID_ { }
+                | constante
                 ;
 
 constante : CTE_
