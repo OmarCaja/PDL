@@ -38,7 +38,7 @@ char msgBuffer[MSG_BUFFER_SIZE];
     t_exp exp;
     int tipo;
     int valor;
-    char * nombre;
+    char *nombre;
 }
 
 /*
@@ -166,17 +166,17 @@ expresion   : expresionLogica
                 {
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
-                        yyerror("Variable no declarada");
-                        $$.tipo = T_ERROR;
-                    } else $$.tipo = simb.tipo;
+                        yyerror("Variable no declarada"); 
+                    } 
+
+                    $$.tipo = simb.tipo;
                 }
             | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
                 {
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
-                        $$.tipo = T_ERROR;
-                    } else $$.tipo = simb.tipo;
+                    } 
 
                     $$.tipo = simb.tipo;
                 }
@@ -185,10 +185,9 @@ expresion   : expresionLogica
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
-                        $$.tipo = T_ERROR;
-                    } else $$.tipo = simb.tipo;
+                    }
 
-                   
+                    $$.tipo = simb.tipo;
                 }
             ;  
 
@@ -233,7 +232,7 @@ expresionIgualdad : expresionRelacional
                     {
                         yyerror("No se puede realizar la operacion con tipos distintos");
                     }
-                 }
+                    }
                   ;  
 
 expresionRelacional : expresionAditiva
@@ -349,43 +348,43 @@ expresionUnaria : expresionSufija
 expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                 | ID_ operadorIncremento
                 {
-                        SIMB simb = obtTdS($1);
-                        if (simb.tipo == T_ERROR) {
-                            yyerror("Variable no declarada");
-                             $$.tipo = T_ERROR;
-                        } else $$.tipo = simb.tipo;
+                    SIMB simb = obtTdS($1);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
                     }
+
+                    $$.tipo = simb.tipo;
+                }
+
                 | ID_ OBRA_ expresion CBRA_ 
                 { 
                     $$ = $3;
-                     SIMB simb = obtTdS($1);
-                        if (simb.tipo == T_ERROR) {
-                            yyerror("Variable no declarada");
-                             $$.tipo = T_ERROR;
-                        } else $$.tipo = simb.tipo;
+                    SIMB simb = obtTdS($1);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
+                        $$.tipo = T_ERROR;
+                    }
+
+                    $$.tipo = simb.tipo;
                 }
                 | ID_
-                    {
-                        SIMB simb = obtTdS($1);
-                        if (simb.tipo == T_ERROR) {
-                            yyerror("Variable no declarada");
-                            $$.tipo = T_ERROR;
-                        } else $$.tipo = simb.tipo;
+                {
+                    SIMB simb = obtTdS($1);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
                     }
-                | ID_ SEP_ ID_
-                    {
-                        SIMB simb = obtTdS($1);
-                        if (simb.tipo == T_ERROR) {
-                            yyerror("Variable no declarada");
-                            $$.tipo = T_ERROR;
-                        } else $$.tipo = simb.tipo;
 
-                        simb = obtTdS($3);
-                        if (simb.tipo == T_ERROR) {
-                            yyerror("Variable no declarada");
-                            $$.tipo = T_ERROR;
-                        } else $$.tipo = simb.tipo;
+                    $$.tipo = simb.tipo;
+                }
+                | ID_ SEP_ ID_
+                {
+                    SIMB simb = obtTdS($1);
+                    if (simb.tipo == T_ERROR) {
+                        yerror("Variable no declarada");
                     }
+
+                    $$.tipo = simb.tipo;
+                }
                 | constante
                 ;
 
@@ -410,32 +409,32 @@ operadorAsignacion  : ASIG_
                     | DIVASIG_
                     ; 
 
-operadorLogico : AND_ { $$ = 0; }
-               | OR_ { $$ = 1; }
+operadorLogico : AND_
+               | OR_
                ; 
 
-operadorIgualdad : IGUAL_ { $$ = 0; }
-                 | DIFERENTE_ { $$ = 1; }
+operadorIgualdad : IGUAL_
+                 | DIFERENTE_
                  ;   
 
-operadorRelacional : MAYOR_ { $$ = 0; }
-                   | MENOR_ { $$ = 1; }
-                   | MAYORIGUAL_ { $$ = 2; }
-                   | MENORIGUAL_ { $$ = 3; }
+operadorRelacional : MAYOR_
+                   | MENOR_
+                   | MAYORIGUAL_
+                   | MENORIGUAL_
                    ; 
 
-operadorAditivo : MAS_ { $$ = 0; }
-                | MENOS_ { $$ = 1; }
+operadorAditivo : MAS_
+                | MENOS_
                 ;
 
-operadorMultiplicativo : POR_ { $$ = 0; }
-                       | DIV_ { $$ = 1; }
-                       | MOD_ { $$ = 2; }
+operadorMultiplicativo : POR_
+                       | DIV_
+                       | MOD_
                        ;  
 
-operadorUnario     : MAS_ { $$ = 1; }
-                   | MENOS_ { $$ = -1; }
-                   | NEG_ { $$ = 0; }
+operadorUnario     : MAS_
+                   | MENOS_
+                   | NEG_
                    ;  
 
 operadorIncremento : INC_
