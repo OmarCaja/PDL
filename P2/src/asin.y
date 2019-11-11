@@ -5,14 +5,23 @@
 #include <stdio.h>
 #include <string.h>
 #include "header.h"
+#include "libtds.h"
 %}
+
+%union
+{
+    int tipo;
+    char* nombre;
+}
 
 %token MAS_ MENOS_ POR_ DIV_ MOD_
 %token OPAR_ CPAR_ OBRA_ CBRA_ OCUR_ CCUR_
 %token ASIG_ MASASIG_ MENOSASIG_ PORASIG_ DIVASIG_
 %token AND_ OR_ IGUAL_ DIFERENTE_ MAYOR_ MENOR_ MAYORIGUAL_ MENORIGUAL_ NEG_
 %token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ VERDADERO_ FALSO_
-%token INSTREND_ SEP_ INC_ DEC_ ID_ CTE_
+%token INSTREND_ SEP_ INC_ DEC_ <nombre> ID_ CTE_
+
+%type <tipo> tipoSimple
 
 %%
 
@@ -30,14 +39,14 @@ sentencia   : declaracion
 declaracion : tipoSimple ID_ INSTREND_
                 {
                     if ($1 == T_ENTERO) {
-                        if (!insTSimpleTDS($2, T_ENTERO, dvar, -1)) {
+                        if (!insTdS($2, T_ENTERO, dvar, -1)) {
                             yyerror ("Identificador repetido");
                         }
                         else dvar += TALLA_TIPO_SIMPLE;
                     }
 
                     if ($1 == T_LOGICO) {
-                        if (!insTSimpleTDS($2, T_LOGICO, dvar, -1)) {
+                        if (!insTdS($2, T_LOGICO, dvar, -1)) {
                             yyerror ("Identificador repetido");
                         }
                         else dvar += TALLA_TIPO_SIMPLE;
@@ -46,14 +55,14 @@ declaracion : tipoSimple ID_ INSTREND_
             | tipoSimple ID_ ASIG_ constante INSTREND_
                 {
                     if ($1 == T_ENTERO) {
-                        if (!insTSimpleTDS($2, T_ENTERO, dvar, -1)) {
+                        if (!insTdS($2, T_ENTERO, dvar, -1)) {
                             yyerror ("Identificador repetido");
                         }
                         else dvar += TALLA_TIPO_SIMPLE;
                     }
 
                     if ($1 == T_LOGICO) {
-                        if (!insTSimpleTDS($2, T_LOGICO, dvar, -1)) {
+                        if (!insTdS($2, T_LOGICO, dvar, -1)) {
                             yyerror ("Identificador repetido");
                         }
                         else dvar += TALLA_TIPO_SIMPLE;
@@ -75,8 +84,8 @@ declaracion : tipoSimple ID_ INSTREND_
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             ;
 
-tipoSimple  : ENTERO_
-            | BOOLEAN_
+tipoSimple  : ENTERO_ { $$ = T_ENTERO; }
+            | BOOLEAN_ { $$ = T_LOGICO; }
             ; 
 
 listaCampos : tipoSimple ID_ INSTREND_
@@ -137,7 +146,7 @@ expresion   : expresionLogica
                         yyerror("Variable no declarada");
                     }
 
-                    SIMB simb = obtTdS($3);
+                    simb = obtTdS($3);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
                     }
@@ -204,7 +213,7 @@ expresionSufija : OPAR_ expresion CPAR_
                             yyerror("Variable no declarada");
                         }
 
-                        SIMB simb = obtTdS($3);
+                        simb = obtTdS($3);
                         if (simb.tipo == T_ERROR) {
                             yyerror("Variable no declarada");
                         }
