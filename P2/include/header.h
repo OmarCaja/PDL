@@ -41,8 +41,8 @@ extern const char *expTypeNameStr[];
 */
 typedef struct t_exp
 {
-	int value;
-	int type;
+    int value;
+    int type;
 }t_exp;
 
 #endif  /* _HEADER_H */

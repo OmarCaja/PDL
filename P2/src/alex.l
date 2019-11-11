@@ -69,6 +69,6 @@ identificador  [a-zA-Z][a-zA-Z0-9_]*
 {identificador}            { retornar (ID_); }
 {numero}                   { retornar (CTE_); }
 {comentario}               { if (verbosidad) ECHO; }
-.	                       { yyerror("Caracter desconocido"); }
+.                          { yyerror("Caracter desconocido"); }
 
 %%
