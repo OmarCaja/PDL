@@ -13,7 +13,7 @@ OBJS = ./alex.o  ./asin.o ./main.o
 YACCFLAGS = --debug --verbose -Wall
 #
 menoscc:	$(OBJS)
-	gcc  $(OBJS)  -I$(INCDIR)  $(COPT)  $(CLIB) -o menoscc
+	gcc  $(OBJS)  -I$(INCDIR)  $(COPT)  $(CLIB) lib/libtds.a -o menoscc
 main.o: $(SRCDIR)/main.c
 	gcc  -I$(INCDIR) $(COPT) -c $(SRCDIR)/main.c
 asin.o:	asin.c

@@ -12,6 +12,8 @@
 {
     constante attrCte;
     int cte;
+    int tipo;
+    char* nombre;
 }
 
 %token MAS_ MENOS_ POR_ DIV_ MOD_
@@ -19,7 +21,7 @@
 %token ASIG_ MASASIG_ MENOSASIG_ PORASIG_ DIVASIG_
 %token AND_ OR_ IGUAL_ DIFERENTE_ MAYOR_ MENOR_ MAYORIGUAL_ MENORIGUAL_ NEG_
 %token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ VERDADERO_ FALSO_
-%token INSTREND_ SEP_ INC_ DEC_ ID_ <attrCte> CTE_
+%token INSTREND_ SEP_ INC_ DEC_ <nombre> ID_ <attrCte> CTE_
 
 %type <attrCte> operadorIncremento
 %type <attrCte> constante
@@ -39,28 +41,72 @@
 %type <cte> operadorIgualdad
 %type <cte> operadorLogico
 
+%type <tipo> tipoSimple
+
 %%
 
-programa : OCUR_ secuenciaSentencias CCUR_
-         ;   
+programa    : OCUR_ secuenciaSentencias CCUR_
+            ;   
 
 secuenciaSentencias : sentencia
                     | secuenciaSentencias sentencia
                     ;
 
-sentencia : declaracion
-          | instruccion
-          ;  
+sentencia   : declaracion
+            | instruccion
+            ;  
 
 declaracion : tipoSimple ID_ INSTREND_
+                {
+                    if ($1 == T_ENTERO) {
+                        if (!insTdS($2, T_ENTERO, dvar, -1)) {
+                            yyerror ("Identificador repetido");
+                        }
+                        else dvar += TALLA_TIPO_SIMPLE;
+                    }
+
+                    if ($1 == T_LOGICO) {
+                        if (!insTdS($2, T_LOGICO, dvar, -1)) {
+                            yyerror ("Identificador repetido");
+                        }
+                        else dvar += TALLA_TIPO_SIMPLE;
+                    }
+                }
             | tipoSimple ID_ ASIG_ constante INSTREND_
+                {
+                    if ($1 == T_ENTERO) {
+                        if (!insTdS($2, T_ENTERO, dvar, -1)) {
+                            yyerror ("Identificador repetido");
+                        }
+                        else dvar += TALLA_TIPO_SIMPLE;
+                    }
+
+                    if ($1 == T_LOGICO) {
+                        if (!insTdS($2, T_LOGICO, dvar, -1)) {
+                            yyerror ("Identificador repetido");
+                        }
+                        else dvar += TALLA_TIPO_SIMPLE;
+                    }
+                }
             | tipoSimple ID_ OBRA_ CTE_ CBRA_ INSTREND_
+                {
+                    int numelem = $4.valor;
+                    if ($4.valor <= 0) {
+                        yyerror("Talla inapropiada del array");
+                        numelem = 0;
+                    }
+                    int refe = insTdA($1, numelem);
+                    if (!insTdS($2, T_ARRAY, dvar, refe)) {
+                        yyerror ("Identificador repetido");
+                    }
+                    else dvar += numelem * TALLA_TIPO_SIMPLE;
+                }
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             ;
 
-tipoSimple : ENTERO_
-           | BOOLEAN_
-           ; 
+tipoSimple  : ENTERO_ { $$ = T_ENTERO; }
+            | BOOLEAN_ { $$ = T_LOGICO; }
+            ; 
 
 listaCampos : tipoSimple ID_ INSTREND_
             | listaCampos tipoSimple ID_ INSTREND_
@@ -74,29 +120,58 @@ instruccion : OCUR_ CCUR_
             | instruccionExpresion
             ;
 
-listaInstrucciones : instruccion
-                   | listaInstrucciones instruccion
-                   ; 
+listaInstrucciones  : instruccion
+                    | listaInstrucciones instruccion
+                    ; 
 
-instruccionEntradaSalida : LEER_ OPAR_ ID_ CPAR_ INSTREND_
-                         | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
-                         ;
+instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
+                            {
+                                SIMB simb = obtTdS($3);
+                                if (simb.tipo == T_ERROR) {
+                                    yyerror("Variable no declarada");
+                                }
+                            }
+                            | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
+                            ;
 
-instruccionSeleccion : SI_ OPAR_ expresion CPAR_ instruccion SINO_ instruccion
-                     ;
+instruccionSeleccion    : SI_ OPAR_ expresion CPAR_ instruccion SINO_ instruccion
+                        ;
 
-instruccionIteracion : MIENTRAS_ OPAR_ expresion CPAR_ instruccion
-                     ;
+instruccionIteracion    : MIENTRAS_ OPAR_ expresion CPAR_ instruccion
+                        ;
 
-instruccionExpresion : expresion INSTREND_ {}
-                     | INSTREND_
-                     ;                    
+instruccionExpresion    : expresion INSTREND_ {}
+                        | INSTREND_
+                        ;                    
 
-expresion : expresionLogica
-          | ID_ operadorAsignacion expresion { }
-          | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion { }
-          | ID_ SEP_ ID_ operadorAsignacion expresion { }
-          ;  
+expresion   : expresionLogica
+            | ID_ operadorAsignacion expresion
+                {
+                    SIMB simb = obtTdS($1);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
+                    }
+                }
+            | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
+                {
+                    SIMB simb = obtTdS($1);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
+                    }
+                }
+            | ID_ SEP_ ID_ operadorAsignacion expresion
+                {
+                    SIMB simb = obtTdS($1);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
+                    }
+
+                    simb = obtTdS($3);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
+                    }
+                }
+            ;  
 
 expresionLogica : expresionIgualdad
                 | expresionLogica operadorLogico expresionIgualdad
@@ -234,14 +309,50 @@ expresionUnaria : expresionSufija
                         yyerror("el operador especificado no se puede aplicar a ese tipo");
                     }
                 }
-                | operadorIncremento ID_ { }
+                | operadorIncremento ID_
+                {
+                    SIMB simb = obtTdS($2);
+                    if (simb.tipo == T_ERROR) {
+                        yyerror("Variable no declarada");
+                    }
+                }
                 ;
 
 expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
-                | ID_ operadorIncremento { }
-                | ID_ OBRA_ expresion CBRA_ { $$ = $3; }
-                | ID_ { }
-                | ID_ SEP_ ID_ { }
+                | ID_ operadorIncremento
+                {
+                        SIMB simb = obtTdS($1);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+                    }
+                | ID_ OBRA_ expresion CBRA_ 
+                { 
+                    $$ = $3;
+                     SIMB simb = obtTdS($1);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+                }
+                | ID_
+                    {
+                        SIMB simb = obtTdS($1);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+                    }
+                | ID_ SEP_ ID_
+                    {
+                        SIMB simb = obtTdS($1);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+
+                        simb = obtTdS($3);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
+                    }
                 | constante
                 ;
 
@@ -258,19 +369,20 @@ constante : CTE_
           }
           ;  
 
-operadorAsignacion : ASIG_
-                   | MASASIG_
-                   | MENOSASIG_
-                   | PORASIG_
-                   | DIVASIG_
-                   ; 
+
+operadorAsignacion  : ASIG_
+                    | MASASIG_
+                    | MENOSASIG_
+                    | PORASIG_
+                    | DIVASIG_
+                    ; 
 
 operadorLogico : AND_ { $$ = 0; }
                | OR_ { $$ = 1; }
                ; 
 
 operadorIgualdad : IGUAL_ { $$ = 0; }
-                 | DIFERENTE_ { $$ = 1; }
+                 | DIFERENTE_ { $$ = 1; }
                  ;   
 
 operadorRelacional : MAYOR_ { $$ = 0; }
@@ -283,7 +395,7 @@ operadorAditivo : MAS_ { $$ = 0; }
                 | MENOS_ { $$ = 1; }
                 ;
 
-operadorMultiplicativo : POR_ { $$ = 0; }
+operadorMultiplicativo : POR_ { $$ = 0; }
                        | DIV_ { $$ = 1; }
                        | MOD_ { $$ = 2; }
                        ;  
@@ -293,7 +405,7 @@ operadorUnario     : MAS_ { $$ = 1; }
                    | NEG_ { $$ = 0; }
                    ;  
 
-operadorIncremento : INC_ { $$.tipo = T_ENTERO; $$.valor = 1; }
-                   | DEC_ { $$.tipo = T_ENTERO; $$.valor = -1; }
+operadorIncremento : INC_
+                   | DEC_
                    ;
 %%
