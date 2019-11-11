@@ -23,7 +23,6 @@
 %token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ VERDADERO_ FALSO_
 %token INSTREND_ SEP_ INC_ DEC_ <nombre> ID_ <attrCte> CTE_
 
-%type <attrCte> operadorIncremento
 %type <attrCte> constante
 %type <attrCte> expresionSufija
 %type <attrCte> expresionUnaria
