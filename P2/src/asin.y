@@ -246,8 +246,16 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                 ;
 
 constante : CTE_
-          | VERDADERO_ { }
-          | FALSO_ { }
+          | VERDADERO_ 
+          {
+              $$.tipo = T_LOGICO;
+              $$.valor = 1;
+          }
+          | FALSO_ 
+          {
+              $$.tipo = T_LOGICO;
+              $$.valor = 0;
+          }
           ;  
 
 operadorAsignacion : ASIG_
