@@ -25,13 +25,6 @@ char msgBuffer[MSG_BUFFER_SIZE];
 %token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ VERDADERO_ FALSO_
 %token INSTREND_ SEP_ INC_ DEC_ <nombre> ID_ <exp> CTE_
 
-%type <valor> operadorUnario
-%type <valor> operadorMultiplicativo
-%type <valor> operadorAditivo
-%type <valor> operadorRelacional
-%type <valor> operadorIgualdad
-%type <valor> operadorLogico
-
 %type <tipo> tipoSimple
 
 %union {
@@ -50,6 +43,8 @@ char msgBuffer[MSG_BUFFER_SIZE];
 %type <exp> expresionAditiva expresionMultiplicativa
 %type <exp> expresionUnaria expresionSufija
 %type <exp> constante
+
+%type <valor> operadorUnario;
 %%
 
 programa    : OCUR_ secuenciaSentencias CCUR_
@@ -119,6 +114,9 @@ declaracion : tipoSimple ID_ INSTREND_
                     else dvar += numelem * TALLA_TIPO_SIMPLE;
                 }
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
+            {
+                
+            }
             ;
 
 tipoSimple  : ENTERO_ { $$ = T_ENTERO; }
@@ -197,18 +195,11 @@ expresionLogica : expresionIgualdad
                     if ($1.tipo == $3.tipo && $1.tipo == T_LOGICO)
                     {
                         $$.tipo = $1.tipo;
-                        switch ($2)
-                        {
-                            case 0:
-                                $$.valor = $1.valor && $3.valor;
-
-                            case 1:
-                                $$.valor = $1.valor || $3.valor;
-                        }
                     }
                     else
                     {
                         yyerror("No se puede realizar la operacion con tipos distintos");
+                        $$.tipo = T_ERROR;
                     }
                  }
                 ;
@@ -219,18 +210,11 @@ expresionIgualdad : expresionRelacional
                     if ($1.tipo == $3.tipo && ($1.tipo == T_ENTERO || $1.tipo == T_LOGICO))
                     {
                         $$.tipo = T_LOGICO;
-                        switch ($2)
-                        {
-                            case 0:
-                                $$.valor = $1.valor == $3.valor;
-
-                            case 1:
-                                $$.valor = $1.valor != $3.valor;
-                        }
                     }
                     else
                     {
                         yyerror("No se puede realizar la operacion con tipos distintos");
+                        $$.tipo = T_ERROR;
                     }
                     }
                   ;  
@@ -240,25 +224,12 @@ expresionRelacional : expresionAditiva
                     {
                     if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                     {
-                        $$.tipo = T_LOGICO;
-                        switch ($2)
-                        {
-                            case 0:
-                                $$.valor = $1.valor > $3.valor;
-
-                            case 1:
-                                $$.valor = $1.valor < $3.valor;
-
-                            case 2:
-                                $$.valor = $1.valor >= $3.valor;
-                            
-                            case 3:
-                                $$.valor = $1.valor <= $3.valor;
-                        }
+                        $$.tipo = $1.tipo;
                     }
                     else
                     {
                         yyerror("No se puede realizar la operacion con tipos distintos");
+                        $$.tipo = T_ERROR;
                     }
                  }
                     ;
@@ -269,14 +240,6 @@ expresionAditiva : expresionMultiplicativa
                     if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                     {
                         $$.tipo = $1.tipo;
-                        switch ($2)
-                        {
-                            case 0:
-                                $$.valor = $1.valor + $3.valor;
-
-                            case 1:
-                                $$.valor = $1.valor - $3.valor;
-                        }
                     }
                     else
                     {
@@ -288,6 +251,7 @@ expresionAditiva : expresionMultiplicativa
                                     getExpTypeName($3.tipo)
                                     );
                             yyerror(msgBuffer);
+                        $$.tipo = T_ERROR;
                     }
                  }
                  ;
@@ -297,22 +261,12 @@ expresionMultiplicativa : expresionUnaria
                         {
                             if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                             {
-                                $$.tipo = $1.tipo;
-                                switch ($2)
-                                {
-                                    case 0:
-                                        $$.valor = $1.valor * $3.valor;
-
-                                    case 1:
-                                        $$.valor = $1.valor / $3.valor; //divisiones por 0 ??
-
-                                    case 2:
-                                        $$.valor = $1.valor % $3.valor; //divisiones por 0 ??, solo puede haber tipos enteros luego no tiene sentido la restriccion del documento
-                                }
+                               $$.tipo = $1.tipo;
                             }
                             else
                             {
                                 yyerror("No se puede realizar la operacion con tipos distintos");
+                                $$.tipo = T_ERROR;
                             }
                         }
                         ;
@@ -320,18 +274,15 @@ expresionMultiplicativa : expresionUnaria
 expresionUnaria : expresionSufija
                 | operadorUnario expresionUnaria 
                 { 
-                    $$.tipo = $2.tipo;
-                    if ($2.tipo == T_ENTERO && $1 != 0)
+                    
+                    if (($2.tipo == T_ENTERO && $1 != 0) || ($2.tipo == T_LOGICO && $1 == 0))
                     {
-                        $$.valor = $1 * $2.valor;
-                    }
-                    else if ($2.tipo == T_LOGICO && $1 == 0)
-                    {
-                        $$.valor = !$2.valor;
+                        $$.tipo = $2.tipo;
                     }
                     else
                     {
                         yyerror("el operador especificado no se puede aplicar a ese tipo");
+                        $$.tipo = T_ERROR;
                     }
                 }
                 | operadorIncremento ID_
@@ -432,9 +383,9 @@ operadorMultiplicativo : POR_
                        | MOD_
                        ;  
 
-operadorUnario     : MAS_
-                   | MENOS_
-                   | NEG_
+operadorUnario     : MAS_ { $$ = 0; }
+                   | MENOS_ { $$ = 1; }
+                   | NEG_ { $$ = 2; }
                    ;  
 
 operadorIncremento : INC_
