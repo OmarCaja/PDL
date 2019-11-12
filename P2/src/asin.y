@@ -115,7 +115,7 @@ declaracion : tipoSimple ID_ INSTREND_
                 }
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             {
-                
+
             }
             ;
 
@@ -331,7 +331,7 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                 {
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
-                        yerror("Variable no declarada");
+                        yyerror("Variable no declarada");
                     }
 
                     $$.tipo = simb.tipo;
