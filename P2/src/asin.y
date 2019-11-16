@@ -112,6 +112,8 @@ declaracion : tipoSimple ID_ INSTREND_
                         yyerror ("Identificador repetido");
                     }
                     else dvar += numelem * TALLA_TIPO_SIMPLE;
+
+
                 }
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             {
@@ -171,12 +173,22 @@ expresion   : expresionLogica
                 }
             | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
                 {
+                    
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
                     } 
+                    
+                    //$$.tipo = simb.tipo;  simb.tipo es T_ARRAY
+                    
+                    DIM dim = obtTdA(simb.ref);
+                    if($3.tipo != T_ENTERO && $3.tipo != T_ERROR)
+                    {
+                        yyerror("El indice del "array" debe ser entero");
+                    }
+                    $$.tipo = dim.telem;
 
-                    $$.tipo = simb.tipo;
+
                 }
             | ID_ SEP_ ID_ operadorAsignacion expresion
                 {
@@ -309,14 +321,21 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
 
                 | ID_ OBRA_ expresion CBRA_ 
                 { 
-                    $$ = $3;
+                    //$$ = $3;
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
                         $$.tipo = T_ERROR;
                     }
+                    DIM dim = obtTdA(simb.ref);
+                    if($3.tipo != T_ENTERO && $3.tipo != T_ERROR)
+                    {
+                        yyerror("El indice del "array" debe ser entero");
+                    }
+                    $$.tipo = dim.telem;
 
-                    $$.tipo = simb.tipo;
+                    //$$.tipo = simb.tipo;
+
                 }
                 | ID_
                 {
