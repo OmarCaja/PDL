@@ -152,9 +152,21 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                             ;
 
 instruccionSeleccion    : SI_ OPAR_ expresion CPAR_ instruccion SINO_ instruccion
+                        {
+                            if ($3.tipo != T_LOGICO)
+                            {
+                                yyerror("La expresion de if debe ser logica");
+                            }
+                        }
                         ;
 
 instruccionIteracion    : MIENTRAS_ OPAR_ expresion CPAR_ instruccion
+                        {
+                            if ($3.tipo != T_LOGICO)
+                            {
+                                yyerror("La expresion de while debe ser logica");
+                            }
+                        }
                         ;
 
 instruccionExpresion    : expresion INSTREND_ {}
