@@ -235,7 +235,7 @@ expresion   : expresionLogica
                     DIM dim = obtTdA(simb.ref);
                     if($3.tipo != T_ENTERO && $3.tipo != T_ERROR)
                     {
-                        yyerror("El indice del "array" debe ser entero");
+                        yyerror("El indice del \"array\" debe ser entero");
                     }
                     $$.tipo = dim.telem;
 
@@ -381,7 +381,7 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     DIM dim = obtTdA(simb.ref);
                     if($3.tipo != T_ENTERO && $3.tipo != T_ERROR)
                     {
-                        yyerror("El indice del "array" debe ser entero");
+                        yyerror("El indice del \"array\" debe ser entero");
                     }
                     $$.tipo = dim.telem;
 
