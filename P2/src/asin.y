@@ -15,6 +15,13 @@
 /** **/
 #define MSG_BUFFER_SIZE 1024
 char msgBuffer[MSG_BUFFER_SIZE];
+/** una ref == -1 se usa para crear una nueva TDR*/
+#define TDR_MAKE_NEW_TABLE (-1)
+#define TDR_REDEFINE_ERROR (-1)
+/**Referencia que estamos usando en la tabla de registros**/
+static int currentTDRRef = TDR_MAKE_NEW_TABLE;
+/**Desplazamiento del campo*/
+static int currentTDRoffset = 0x00;
 
 %}
 
@@ -117,7 +124,24 @@ declaracion : tipoSimple ID_ INSTREND_
                 }
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             {
-
+                 int rc;
+                 printf("%s\n",$5);
+                 rc = insTdS($5, T_RECORD, dvar, currentTDRRef);
+                 if(rc == FALSE)
+                 {
+                     sprintf(msgBuffer,"'%s' Identificador repetido", $5);
+                     yyerror (msgBuffer);
+                 }
+                 else
+                 {
+                     dvar += currentTDRoffset;
+                 }
+                 /*
+                    Los proximos campos que encontremos
+                    son de otra estructura, así que crearemos nueva tabla
+                 */
+                 currentTDRoffset = 0x00;
+                 currentTDRRef = TDR_MAKE_NEW_TABLE;
             }
             ;
 
@@ -127,6 +151,21 @@ tipoSimple  : ENTERO_ { $$ = T_ENTERO; }
 
 listaCampos : tipoSimple ID_ INSTREND_
             | listaCampos tipoSimple ID_ INSTREND_
+            {
+                int rc;
+                rc = insTdR(currentTDRRef, $3 , $2, currentTDRoffset);
+                if(currentTDRRef == TDR_MAKE_NEW_TABLE)
+                { /* Guardamos  la referencia a la nueva tabla*/
+                    currentTDRRef = rc;
+                    currentTDRoffset += TALLA_TIPO_SIMPLE;
+                    break;
+                }
+                /***/
+                if(rc == TDR_REDEFINE_ERROR)
+                { yyerror ("Identificador repetido"); }
+                else
+                { currentTDRoffset += TALLA_TIPO_SIMPLE; }
+            }
             ;
 
 instruccion : OCUR_ CCUR_
