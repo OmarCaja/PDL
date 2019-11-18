@@ -68,7 +68,7 @@ identificador  [a-zA-Z][a-zA-Z0-9_]*
 "false"                    { retornar (FALSO_); }
 {delimitador}              { if (verbosidad) ECHO; }
 {numero}                   { yylval.exp.valor = atoi(yytext); yylval.exp.tipo = T_ENTERO; retornar (CTE_); }
-{identificador}            { yylval.nombre = yytext; retornar (ID_); }
+{identificador}            { yylval.nombre = strdup(yytext); retornar (ID_); }
 {comentario}               { if (verbosidad) ECHO; }
 .                          { yyerror("Caracter desconocido"); }
 
