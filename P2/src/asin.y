@@ -239,26 +239,30 @@ expresion   : expresionLogica
                 }
             | ID_ SEP_ ID_ operadorAsignacion expresion
                 {
-                    if ($1.tipo == T_ESTRUCTURA)
-                    {
-                        SIMB simb = obtTdS($1);
-                        if (simb.tipo == T_ERROR) {
-                            yyerror("Variable no declarada");
-                        }
+                    SIMB simb = obtTdS($1);
+                    $$.tipo = simb.tipo;
+                    if (simb.tipo == T_ERROR){
+                        yyerror("Variable no declarada");
+                        break;
+                    } 
 
-                        $$.tipo = simb.tipo;
-                    }
-                    else
+                    if (simb.tipo != T_RECORD)
                     {
                         yyerror("El identificador debe ser \"struct\"");
                         $$.tipo = T_ERROR;
-                    }
+                        break;
+                    }                    
                 }
             ;  
 
 expresionLogica : expresionIgualdad
                 | expresionLogica operadorLogico expresionIgualdad
                 {
+                    if (($1.tipo == T_ERROR || $3.tipo == T_ERROR))
+                    {
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
                     if ($1.tipo == $3.tipo && $1.tipo == T_LOGICO)
                     {
                         $$.tipo = $1.tipo;
@@ -304,6 +308,10 @@ expresionRelacional : expresionAditiva
 expresionAditiva : expresionMultiplicativa 
                  | expresionAditiva operadorAditivo expresionMultiplicativa
                  {
+                    $$.tipo = $1.tipo;
+                    if($1.tipo == T_ERROR)
+                    { break; }
+                    
                     if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                     {
                         $$.tipo = $1.tipo;
@@ -404,11 +412,24 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                 | ID_ SEP_ ID_
                 {
                     SIMB simb = obtTdS($1);
-                    if (simb.tipo == T_ERROR) {
-                        yyerror("Variable no declarada");
-                    }
-
                     $$.tipo = simb.tipo;
+                    if (simb.tipo == T_ERROR){
+                        yyerror("Variable no declarada");
+                        break;
+                    } 
+                    if (simb.tipo != T_RECORD)
+                    {
+                        yyerror("El identificador debe ser \"struct\"");
+                        $$.tipo = T_ERROR;
+                        break;
+                    }    
+                    /**/               
+                    $$.tipo =  obtTdR(simb.ref,$3).tipo;
+                    if ($$.tipo == T_ERROR){
+                        yyerror("campo no declarada");
+                        break;
+                    } 
+                    /**/
                 }
                 | constante
                 ;
