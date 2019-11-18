@@ -67,23 +67,19 @@ sentencia   : declaracion
 
 declaracion : tipoSimple ID_ INSTREND_
                 {
-                    if ($1 == T_ENTERO) {
-                        if (!insTdS($2, T_ENTERO, dvar, -1)) {
+                    
+                        if (!insTdS($2, $1, dvar, -1)) {
                             yyerror ("Identificador repetido");
                         }
-                        else dvar += TALLA_TIPO_SIMPLE;
-                    }
-
-                    if ($1 == T_LOGICO) {
-                        if (!insTdS($2, T_LOGICO, dvar, -1)) {
-                            yyerror ("Identificador repetido");
+                        else
+                        {
+                            dvar += TALLA_TIPO_SIMPLE;                    
                         }
-                        else dvar += TALLA_TIPO_SIMPLE;
-                    }
+                        verTdS();
                 }
             | tipoSimple ID_ ASIG_ constante INSTREND_
                 {
-                    /*tipo Check*/
+                    /*type Check*/
                     if($1 != $4.tipo)
                     {
                         sprintf(msgBuffer,
@@ -243,12 +239,20 @@ expresion   : expresionLogica
                 }
             | ID_ SEP_ ID_ operadorAsignacion expresion
                 {
-                    SIMB simb = obtTdS($1);
-                    if (simb.tipo == T_ERROR) {
-                        yyerror("Variable no declarada");
-                    }
+                    if ($1.tipo == T_ESTRUCTURA)
+                    {
+                        SIMB simb = obtTdS($1);
+                        if (simb.tipo == T_ERROR) {
+                            yyerror("Variable no declarada");
+                        }
 
-                    $$.tipo = simb.tipo;
+                        $$.tipo = simb.tipo;
+                    }
+                    else
+                    {
+                        yyerror("El identificador debe ser \"struct\"");
+                        $$.tipo = T_ERROR;
+                    }
                 }
             ;  
 
