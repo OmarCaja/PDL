@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "header.h"
+#include "libtds.h"
 
 int verbosidad = FALSE;             /* Flag si se desea una traza            */
 int numErrores = 0;                 /* Contador del numero de errores        */
