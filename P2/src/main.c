@@ -81,7 +81,7 @@ int main (int argc, char **argv)
         return(1);
     }
     //
-    if (verbosidad == TRUE)
+    if (verbosidad)
         fprintf(stdout,"%3d.- ", yylineno);
     //
     int rc;
@@ -91,7 +91,7 @@ int main (int argc, char **argv)
     if( numErrores == 0
         && rc == 0)
         fprintf(stderr,"\n[INFO]\t\"%s\" parsed successfully :')\n",filePath);
-    if (yydebug)
+    if (verbosidad)
     {
         verTdS();
     }
