@@ -29,12 +29,6 @@ void yyerror(const char * msg)
     numErrores++;  fflush(stdout);
     fprintf(stdout, "Error in line %d: %s\n", yylineno, msg);
 }
-/*****************************************************************************/
-void yywrap()
-{
-    printf("EOF\n");
-    exit (0);
-}
 
 /*****************************************************************************/
 void printUsage(void)
@@ -86,15 +80,14 @@ int main (int argc, char **argv)
     //
     int rc;
     rc = yyparse ();
-    if (numErrores > 0) 
-        fprintf(stderr,"\n[ERROR]\tSyntax errors:\t%d\n", numErrores);
-    if( numErrores == 0
-        && rc == 0)
-        fprintf(stderr,"\n[INFO]\t\"%s\" parsed successfully :')\n",filePath);
     if (verbosidad == TRUE)
     {
         verTdS();
     }
+    if (numErrores > 0) 
+        fprintf(stderr,"\n[ERROR]\tSyntax errors:\t%d\n", numErrores);
+    if (numErrores == 0 && rc == 0)
+        fprintf(stderr,"\n[INFO]\t\"%s\" parsed successfully :')\n",filePath);
     //
     return (0);
 }
