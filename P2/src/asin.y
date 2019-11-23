@@ -378,14 +378,7 @@ expresionAditiva : expresionMultiplicativa
                     }
                     else
                     {
-                        sprintf(msgBuffer,
-                                    "invalid operands of tipos"
-                                    " ‘%s’ and ‘%s’"
-                                    "to additive operator",
-                                    getExpTypeName($1.tipo),
-                                    getExpTypeName($3.tipo)
-                                    );
-                            yyerror(msgBuffer);
+                        yyerror("Error de tipos en \"expresion aditiva\"");
                         $$.tipo = T_ERROR;
                     }
                  }
@@ -400,7 +393,7 @@ expresionMultiplicativa : expresionUnaria
                             }
                             else
                             {
-                                yyerror("Error en \"expresion multiplicativa\"");
+                                yyerror("Error de tipos en \"expresion multiplicativa\"");
                                 $$.tipo = T_ERROR;
                             }
                         }
