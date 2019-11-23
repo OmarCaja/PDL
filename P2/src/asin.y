@@ -157,7 +157,7 @@ listaCampos : tipoSimple ID_ INSTREND_
 instruccion : OCUR_ CCUR_
             | OCUR_ listaInstrucciones CCUR_
             | instruccionEntradaSalida
-            | instruccionSeleccion {}
+            | instruccionSeleccion
             | instruccionIteracion
             | instruccionExpresion
             ;
@@ -183,7 +183,7 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                             {
                                 if($3.tipo != T_ENTERO && $3.tipo != T_ERROR)
                                 {
-                                    yyerror("La expresion del \"print\" debe ser \"entera\"");
+                                    yyerror("El argumento del \"print\" debe ser \"entero\"");
                                 }
                             }
                             ;
@@ -223,7 +223,8 @@ expresion   : expresionLogica
 
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
-                        yyerror("Variable no declarada"); 
+                        yyerror("Variable no declarada");
+                        $$.tipo = T_ERROR; 
                         break;
                     }
 
@@ -245,12 +246,14 @@ expresion   : expresionLogica
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
+                        $$.tipo = T_ERROR;
                         break;
                     } 
                     
                     if (simb.tipo != T_ARRAY)
                     {
                         yyerror("El identificador debe ser de tipo \"array\"");
+                        $$.tipo = T_ERROR;
                         break;
                     }
 
@@ -455,20 +458,21 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         break;
                     }
 
-                    //$$ = $3;
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
                         $$.tipo = T_ERROR;
+                        break;
                     }
+
                     DIM dim = obtTdA(simb.ref);
-                    if($3.tipo != T_ENTERO && $3.tipo != T_ERROR)
+                    if($3.tipo != T_ENTERO)
                     {
                         yyerror("El indice del \"array\" debe ser entero");
+                        $$.tipo = T_ERROR;
+                        break;
                     }
                     $$.tipo = dim.telem;
-
-                    //$$.tipo = simb.tipo;
 
                 }
                 | ID_
@@ -477,12 +481,14 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
                     }
+                    
                     if(simb.tipo != T_ENTERO && simb.tipo != T_LOGICO)
                     {
                         yyerror("El identificador debe ser de tipo simple");
                         $$.tipo = T_ERROR;
                         break;
                     }
+
                     $$.tipo = simb.tipo;
                 }
                 | ID_ SEP_ ID_
