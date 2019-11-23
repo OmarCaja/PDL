@@ -49,7 +49,7 @@ static int currentTDRoffset = 0x00;
 %type <exp> expresion expresionLogica expresionIgualdad expresionRelacional
 %type <exp> expresionAditiva expresionMultiplicativa
 %type <exp> expresionUnaria expresionSufija
-%type <exp> constante
+%type <exp> constante instruccionSeleccion
 
 %type <valor> operadorUnario;
 %%
@@ -185,7 +185,7 @@ listaCampos : tipoSimple ID_ INSTREND_
 instruccion : OCUR_ CCUR_
             | OCUR_ listaInstrucciones CCUR_
             | instruccionEntradaSalida
-            | instruccionSeleccion
+            | instruccionSeleccion {}
             | instruccionIteracion
             | instruccionExpresion
             ;
@@ -210,12 +210,23 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                             | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
                             ;
 
-instruccionSeleccion    : SI_ OPAR_ expresion CPAR_ instruccion SINO_ instruccion
+instruccionSeleccion    : SI_ OPAR_ expresion CPAR_ 
                         {
+                            if ($3.tipo == T_ERROR)
+                            {
+                                $<exp>$.tipo = T_ERROR;
+                                break;
+                            }
+
                             if ($3.tipo != T_LOGICO)
                             {
                                 yyerror("La expresion de if debe ser logica");
+                                $<exp>$.tipo = T_ERROR;
                             }
+                        }
+                        instruccion SINO_ instruccion
+                        {
+                            $$.tipo = $<exp>5.tipo;
                         }
                         ;
 
@@ -237,34 +248,70 @@ instruccionExpresion    : expresion INSTREND_ {}
 expresion   : expresionLogica
             | ID_ operadorAsignacion expresion
                 {
+                    if ($3.tipo == T_ERROR)
+                    {
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
+
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada"); 
-                    } 
+                        break;
+                    }
 
-                    $$.tipo = simb.tipo;
+                    if (simb.tipo != $3.tipo)
+                    {
+                        yyerror("Error de tipos en la \"asignacion\"");
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
                 }
             | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
                 {
-                    
+                    if ($3.tipo == T_ERROR || $6.tipo == T_ERROR)
+                    {
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
+
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
+                        break;
                     } 
                     
-                    //$$.tipo = simb.tipo;  simb.tipo es T_ARRAY
-                    
+                    if (simb.tipo != T_ARRAY)
+                    {
+                        yyerror("El identificador debe ser de tipo \"array\"");
+                        break;
+                    }
+
                     DIM dim = obtTdA(simb.ref);
-                    if($3.tipo != T_ENTERO && $3.tipo != T_ERROR)
+
+                    if($3.tipo != T_ENTERO)
                     {
                         yyerror("El indice del \"array\" debe ser entero");
+                        $$.tipo = T_ERROR;
+                        break;
                     }
-                    $$.tipo = dim.telem;
 
+                    if (dim.telem != $6.tipo)
+                    {
+                        yyerror("Error de tipos en la \"asignacion\"");
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
 
                 }
             | ID_ SEP_ ID_ operadorAsignacion expresion
                 {
+                    if ($5.tipo == T_ERROR)
+                    {
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
+
                     SIMB simb = obtTdS($1);
                     $$.tipo = simb.tipo;
                     if (simb.tipo == T_ERROR){
@@ -277,7 +324,20 @@ expresion   : expresionLogica
                         yyerror("El identificador debe ser \"struct\"");
                         $$.tipo = T_ERROR;
                         break;
-                    }                    
+                    }   
+
+                    $$.tipo =  obtTdR(simb.ref,$3).tipo;
+                    if ($$.tipo == T_ERROR){
+                        yyerror("Campo no declarado");
+                        break;
+                    }
+
+                    if ($$.tipo != $5.tipo)
+                    {
+                        yyerror("Error de tipos en la \"asignacion\"");
+                        $$.tipo = T_ERROR;
+                        break;
+                    }                  
                 }
             ;  
 
@@ -295,7 +355,7 @@ expresionLogica : expresionIgualdad
                     }
                     else
                     {
-                        yyerror("No se puede realizar la operacion con tipos distintos");
+                        yyerror("Error en \"expresion logica\"");
                         $$.tipo = T_ERROR;
                     }
                  }
@@ -310,7 +370,7 @@ expresionIgualdad : expresionRelacional
                     }
                     else
                     {
-                        yyerror("No se puede realizar la operacion con tipos distintos");
+                        yyerror("Error en \"expresion de igualdad\"");
                         $$.tipo = T_ERROR;
                     }
                     }
@@ -325,7 +385,7 @@ expresionRelacional : expresionAditiva
                     }
                     else
                     {
-                        yyerror("No se puede realizar la operacion con tipos distintos");
+                        yyerror("Error en \"expresion relacional\"");
                         $$.tipo = T_ERROR;
                     }
                  }
@@ -344,14 +404,7 @@ expresionAditiva : expresionMultiplicativa
                     }
                     else
                     {
-                        sprintf(msgBuffer,
-                                    "invalid operands of tipos"
-                                    " ‘%s’ and ‘%s’"
-                                    "to additive operator",
-                                    getExpTypeName($1.tipo),
-                                    getExpTypeName($3.tipo)
-                                    );
-                            yyerror(msgBuffer);
+                        yyerror("Error de tipos en \"expresion aditiva\"");
                         $$.tipo = T_ERROR;
                     }
                  }
@@ -366,7 +419,7 @@ expresionMultiplicativa : expresionUnaria
                             }
                             else
                             {
-                                yyerror("No se puede realizar la operacion con tipos distintos");
+                                yyerror("Error de tipos en \"expresion multiplicativa\"");
                                 $$.tipo = T_ERROR;
                             }
                         }
@@ -375,14 +428,13 @@ expresionMultiplicativa : expresionUnaria
 expresionUnaria : expresionSufija
                 | operadorUnario expresionUnaria 
                 { 
-                    
                     if (($2.tipo == T_ENTERO && $1 != 0) || ($2.tipo == T_LOGICO && $1 == 0))
                     {
                         $$.tipo = $2.tipo;
                     }
                     else
                     {
-                        yyerror("el operador especificado no se puede aplicar a ese tipo");
+                        yyerror("Error en \"expresion unaria\"");
                         $$.tipo = T_ERROR;
                     }
                 }
@@ -391,9 +443,16 @@ expresionUnaria : expresionSufija
                     SIMB simb = obtTdS($2);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
+                        $$.tipo = T_ERROR;
+                        break;
                     }
 
-                    $$.tipo = simb.tipo;
+                    if (simb.tipo != T_ENTERO)
+                    {
+                        yyerror("El identificador debe ser entero");
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
                 }
                 ;
 
@@ -403,13 +462,26 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
+                        $$.tipo = T_ERROR;
+                        break;
                     }
 
-                    $$.tipo = simb.tipo;
+                    if (simb.tipo != T_ENTERO)
+                    {
+                        yyerror("El identificador debe ser entero");
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
                 }
 
                 | ID_ OBRA_ expresion CBRA_ 
                 { 
+                    if ($3.tipo == T_ERROR)
+                    {
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
+
                     //$$ = $3;
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
@@ -442,20 +514,21 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     if (simb.tipo == T_ERROR){
                         yyerror("Variable no declarada");
                         break;
-                    } 
+                    }
+
                     if (simb.tipo != T_RECORD)
                     {
                         yyerror("El identificador debe ser \"struct\"");
                         $$.tipo = T_ERROR;
                         break;
                     }    
-                    /**/               
+
                     $$.tipo =  obtTdR(simb.ref,$3).tipo;
                     if ($$.tipo == T_ERROR){
-                        yyerror("campo no declarada");
+                        yyerror("Campo no declarado");
                         break;
                     } 
-                    /**/
+
                 }
                 | constante
                 ;
@@ -504,9 +577,9 @@ operadorMultiplicativo : POR_
                        | MOD_
                        ;  
 
-operadorUnario     : MAS_ { $$ = 0; }
-                   | MENOS_ { $$ = 1; }
-                   | NEG_ { $$ = 2; }
+operadorUnario     : MAS_ { $$ = 1; }
+                   | MENOS_ { $$ = 2; }
+                   | NEG_ { $$ = 0; }
                    ;  
 
 operadorIncremento : INC_
