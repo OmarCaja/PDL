@@ -181,7 +181,13 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                                 SIMB simb = obtTdS($3);
                                 if (simb.tipo == T_ERROR) {
                                     yyerror("Variable no declarada");
+                                    break;
                                 }
+                                if(simb.tipo != T_ENTERO)
+                                {
+                                    yyerror("El argumento del \"read\" debe ser \"entero\"");
+                                }
+
                             }
                             | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
                             ;
@@ -195,13 +201,15 @@ instruccionSeleccion    : SI_ OPAR_ expresion CPAR_ instruccion SINO_ instruccio
                         }
                         ;
 
-instruccionIteracion    : MIENTRAS_ OPAR_ expresion CPAR_ instruccion
+instruccionIteracion    : MIENTRAS_ OPAR_ expresion 
                         {
                             if ($3.tipo != T_LOGICO)
                             {
                                 yyerror("La expresion de while debe ser logica");
                             }
                         }
+                        
+                        CPAR_ instruccion
                         ;
 
 instruccionExpresion    : expresion INSTREND_ {}
