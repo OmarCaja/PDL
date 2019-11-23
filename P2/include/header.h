@@ -52,6 +52,12 @@ typedef struct
 
 typedef struct
 {
+    int tipo;
+    int posicion;
+}t_tmp_var;
+
+typedef struct
+{
     int referencia_struct;
     int desplazamiento_campo;
 }t_listaCampos;

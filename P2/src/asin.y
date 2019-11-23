@@ -25,18 +25,20 @@ char msgBuffer[MSG_BUFFER_SIZE];
 %token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ VERDADERO_ FALSO_
 %token INSTREND_ SEP_ INC_ DEC_ <nombre> ID_ <exp> CTE_
 
-%type <tipo> tipoSimple
-%type <exp> expresion expresionLogica expresionIgualdad expresionRelacional
-%type <exp> expresionAditiva expresionMultiplicativa
-%type <exp> expresionUnaria expresionSufija
-%type <exp> constante
-%type <valor> operadorUnario;
+%type <tipo_simple> tipoSimple
+%type <tmp_var> expresion expresionLogica expresionIgualdad expresionRelacional
+%type <tmp_var> expresionAditiva expresionMultiplicativa
+%type <tmp_var> expresionUnaria expresionSufija
+%type <tmp_var> constante
+%type <codigo> operadorUnario;
 %type <listaCampos> listaCampos;
 
 
 %union {
     t_exp exp;
-    int tipo;
+    t_tmp_var tmp_var; // Preparado con la posicion para la generacion de CI
+    int tipo_simple;
+    int codigo;
     char *nombre;
     t_listaCampos listaCampos;
 }
