@@ -371,30 +371,36 @@ expresionLogica : expresionIgualdad
 expresionIgualdad : expresionRelacional
                   | expresionIgualdad operadorIgualdad expresionRelacional
                   {
-                    if ($1.tipo == $3.tipo && ($1.tipo == T_ENTERO || $1.tipo == T_LOGICO))
+                    $$.tipo = T_LOGICO;
+                    if ($1.tipo == T_ERROR || $3.tipo == T_ERROR)
                     {
-                        $$.tipo = T_LOGICO;
+                        $$.tipo = T_ERROR;
                     }
-                    else
+                    /**/
+                    if ($1.tipo != $3.tipo)
                     {
                         yyerror("Error en \"expresion de igualdad\"");
                         $$.tipo = T_ERROR;
                     }
-                    }
+                    /**/
+                   }
                   ;  
 
 expresionRelacional : expresionAditiva
                     | expresionRelacional operadorRelacional expresionAditiva
+                  {
+                    $$.tipo = T_LOGICO;
+                    if ($1.tipo == T_ERROR || $3.tipo == T_ERROR)
                     {
-                    if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
-                    {
-                        $$.tipo = $1.tipo;
+                        $$.tipo = T_ERROR;
                     }
-                    else
+                    /**/
+                    if ($1.tipo != $3.tipo)
                     {
                         yyerror("Error en \"expresion relacional\"");
                         $$.tipo = T_ERROR;
                     }
+                    /**/
                  }
                     ;
 
