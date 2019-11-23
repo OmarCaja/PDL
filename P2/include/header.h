@@ -11,6 +11,8 @@
 #define FALSE 0
 #define TALLA_TIPO_SIMPLE 1
 #define REF_TIPO_SIMPLE -1
+#define NUEVA_ESTRUCTURA -1
+#define TDR_ERROR_CAMPO_EXISTENTE -1
 /************************************* Variables externas definidas en el AL */
 extern int yylex();
 extern int yyparse();
@@ -46,7 +48,14 @@ typedef struct t_exp
 {
     int valor;
     int tipo;
-}t_exp;
+};
+
+typedef struct t_listaCampos
+{
+    int referencia_struct;
+    int desplazamiento_campo;
+};
+
 
 #endif  /* _HEADER_H */
 /*****************************************************************************/

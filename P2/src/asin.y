@@ -15,13 +15,6 @@
 /** **/
 #define MSG_BUFFER_SIZE 1024
 char msgBuffer[MSG_BUFFER_SIZE];
-/** una ref == -1 se usa para crear una nueva TDR*/
-#define TDR_MAKE_NEW_TABLE (-1)
-#define TDR_REDEFINE_ERROR (-1)
-/**Referencia que estamos usando en la tabla de registros**/
-static int currentTDRRef = TDR_MAKE_NEW_TABLE;
-/**Desplazamiento del campo*/
-static int currentTDRoffset = 0x00;
 
 %}
 
@@ -38,6 +31,7 @@ static int currentTDRoffset = 0x00;
 %type <exp> expresionUnaria expresionSufija
 %type <exp> constante
 %type <valor> operadorUnario;
+%type <listaCampos> listaCampos;
 
 
 %union {
@@ -45,6 +39,7 @@ static int currentTDRoffset = 0x00;
     int tipo;
     int valor;
     char *nombre;
+    t_listaCampos listaCampos;
 }
 
 %%
@@ -138,35 +133,27 @@ tipoSimple  : ENTERO_ { $$ = T_ENTERO; }
 
 listaCampos : tipoSimple ID_ INSTREND_
             {
-                int rc;
-                rc = insTdR(currentTDRRef, $2 , $1, currentTDRoffset);
-                if(currentTDRRef == TDR_MAKE_NEW_TABLE)
-                { /* Guardamos  la referencia a la nueva tabla*/
-                    currentTDRRef = rc;
-                    currentTDRoffset += TALLA_TIPO_SIMPLE;
-                    break;
-                }
-                /***/
-                if(rc == TDR_REDEFINE_ERROR)
-                { yyerror ("Campo repetido"); }
-                else
-                { currentTDRoffset += TALLA_TIPO_SIMPLE; }
+                int desplazamiento = 0;
+                $$.referencia_struct = insTdR(NUEVA_ESTRUCTURA, $2 , $1, desplazamiento);
+                $$.desplazamiento_campo = desplazamiento;
             }
             | listaCampos tipoSimple ID_ INSTREND_
             {
-                int rc;
-                rc = insTdR(currentTDRRef, $3 , $2, currentTDRoffset);
-                if(currentTDRRef == TDR_MAKE_NEW_TABLE)
-                { /* Guardamos  la referencia a la nueva tabla*/
-                    currentTDRRef = rc;
-                    currentTDRoffset += TALLA_TIPO_SIMPLE;
-                    break;
+                int referencia;
+                int desplazamiento = $1.desplazamiento_campo + TALLA_TIPO_SIMPLE;
+                referencia = insTdR($1.referencia_struct, $3 , $2, desplazamiento);
+
+                $$.referencia_struct = $1.referencia_struct;
+                
+                if(referencia == TDR_ERROR_CAMPO_EXISTENTE)
+                { 
+                    yyerror ("Campo repetido"); 
+                    $$.desplazamiento_campo = $1.desplazamiento_campo;
                 }
-                /***/
-                if(rc == TDR_REDEFINE_ERROR)
-                { yyerror ("Campo repetido"); }
                 else
-                { currentTDRoffset += TALLA_TIPO_SIMPLE; }
+                { 
+                    $$.desplazamiento_campo = desplazamiento;
+                }
             }
             ;
 
