@@ -112,18 +112,15 @@ declaracion : tipoSimple ID_ INSTREND_
                 }
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             {
-                if(!insTdS($5, T_RECORD, dvar, currentTDRRef);)
+                if(!insTdS($5, T_RECORD, dvar, $1.referencia_struct);)
                 {
                     sprintf(msgBuffer,"'%s' Identificador repetido", $5);
                     yyerror (msgBuffer);
                 }
                 else
                 {
-                    dvar += currentTDRoffset;
+                    actualizarDesplazamiento($3.desplazamiento_campo);
                 }
-
-                currentTDRoffset = 0x00;
-                currentTDRRef = TDR_MAKE_NEW_TABLE;
             }
             ;
 
