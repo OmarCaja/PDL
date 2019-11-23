@@ -133,7 +133,7 @@ declaracion : tipoSimple ID_ INSTREND_
                      dvar += currentTDRoffset;
                  }
                  if(yydebug)
-					verTdS();
+                    verTdS();
 
                  /*
                     Los proximos campos que encontremos
