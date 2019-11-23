@@ -208,6 +208,13 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
 
                             }
                             | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
+                            {
+                                printf("%d \n",$3.tipo);
+                                if($3.tipo != T_ENTERO && $3.tipo != T_ERROR)
+                                {
+                                    yyerror("La expresion del \"print\" debe ser \"entera\"");
+                                }
+                            }
                             ;
 
 instruccionSeleccion    : SI_ OPAR_ expresion CPAR_ 
@@ -504,7 +511,10 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
                     }
-
+                    if(simb.tipo != T_ENTERO && simb.tipo != T_LOGICO)
+                    {
+                        yyerror("El identificador debe ser de tipo simple");
+                    }
                     $$.tipo = simb.tipo;
                 }
                 | ID_ SEP_ ID_
