@@ -190,22 +190,12 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
 
 instruccionSeleccion    : SI_ OPAR_ expresion CPAR_ 
                         {
-                            if ($3.tipo == T_ERROR)
-                            {
-                                $<exp>$.tipo = T_ERROR;
-                                break;
-                            }
-
-                            if ($3.tipo != T_LOGICO)
+                            if ($3.tipo != T_ERROR && $3.tipo != T_LOGICO)
                             {
                                 yyerror("La expresion de if debe ser logica");
-                                $<exp>$.tipo = T_ERROR;
                             }
                         }
                         instruccion SINO_ instruccion
-                        {
-                            $$.tipo = $<exp>5.tipo;
-                        }
                         ;
 
 instruccionIteracion    : MIENTRAS_ OPAR_ expresion 
