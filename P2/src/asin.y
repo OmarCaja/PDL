@@ -132,12 +132,12 @@ listaCampos : tipoSimple ID_ INSTREND_
             {
                 int desplazamiento = 0;
                 $$.referencia_struct = insTdR(NUEVA_ESTRUCTURA, $2 , $1, desplazamiento);
-                $$.desplazamiento_campo = desplazamiento;
+                $$.desplazamiento_campo = desplazamiento + TALLA_TIPO_SIMPLE;
             }
             | listaCampos tipoSimple ID_ INSTREND_
             {
                 int referencia;
-                int desplazamiento = $1.desplazamiento_campo + TALLA_TIPO_SIMPLE;
+                int desplazamiento = $1.desplazamiento_campo;
                 referencia = insTdR($1.referencia_struct, $3 , $2, desplazamiento);
 
                 $$.referencia_struct = $1.referencia_struct;
@@ -145,11 +145,11 @@ listaCampos : tipoSimple ID_ INSTREND_
                 if(referencia == TDR_ERROR_CAMPO_EXISTENTE)
                 { 
                     yyerror ("Campo repetido"); 
-                    $$.desplazamiento_campo = $1.desplazamiento_campo;
+                    $$.desplazamiento_campo = desplazamiento;
                 }
                 else
                 { 
-                    $$.desplazamiento_campo = desplazamiento;
+                    $$.desplazamiento_campo = desplazamiento + TALLA_TIPO_SIMPLE;
                 }
             }
             ;
