@@ -70,8 +70,8 @@ declaracion : tipoSimple ID_ INSTREND_
                     if($1 != $4.tipo)
                     {
                         sprintf(msgBuffer,
-                                "Can't assign"
-                                " ‘%s’ to ‘%s’",
+                                "No se pudo asignar"
+                                " ‘%s’ a ‘%s’",
                                 getExpTypeName($1),
                                 getExpTypeName($4.tipo)
                                 );
@@ -324,7 +324,7 @@ expresionLogica : expresionIgualdad
                     }
                     else
                     {
-                        yyerror("Error en \"expresion logica\"");
+                        yyerror("Error de tipos en \"expresion logica\"");
                         $$.tipo = T_ERROR;
                     }
                  }
@@ -341,7 +341,7 @@ expresionIgualdad : expresionRelacional
                     /**/
                     if ($1.tipo != $3.tipo)
                     {
-                        yyerror("Error en \"expresion de igualdad\"");
+                        yyerror("Error de tipos en \"expresion de igualdad\"");
                         $$.tipo = T_ERROR;
                     }
                     /**/
@@ -359,7 +359,7 @@ expresionRelacional : expresionAditiva
                     /**/
                     if ($1.tipo != $3.tipo)
                     {
-                        yyerror("Error en \"expresion relacional\"");
+                        yyerror("Error de tipos en \"expresion relacional\"");
                         $$.tipo = T_ERROR;
                     }
                     /**/
@@ -409,7 +409,7 @@ expresionUnaria : expresionSufija
                     }
                     else
                     {
-                        yyerror("Error en \"expresion unaria\"");
+                        yyerror("Error de tipos en \"expresion unaria\"");
                         $$.tipo = T_ERROR;
                     }
                 }
