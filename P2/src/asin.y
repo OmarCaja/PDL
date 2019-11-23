@@ -33,6 +33,12 @@ static int currentTDRoffset = 0x00;
 %token INSTREND_ SEP_ INC_ DEC_ <nombre> ID_ <exp> CTE_
 
 %type <tipo> tipoSimple
+%type <exp> expresion expresionLogica expresionIgualdad expresionRelacional
+%type <exp> expresionAditiva expresionMultiplicativa
+%type <exp> expresionUnaria expresionSufija
+%type <exp> constante
+%type <valor> operadorUnario;
+
 
 %union {
     t_exp exp;
@@ -41,17 +47,6 @@ static int currentTDRoffset = 0x00;
     char *nombre;
 }
 
-/*
-    Campo de la union vamos a utilizar para los no terminales
-    y para cada token
-*/
-
-%type <exp> expresion expresionLogica expresionIgualdad expresionRelacional
-%type <exp> expresionAditiva expresionMultiplicativa
-%type <exp> expresionUnaria expresionSufija
-%type <exp> constante instruccionSeleccion
-
-%type <valor> operadorUnario;
 %%
 
 programa    : OCUR_ secuenciaSentencias CCUR_
@@ -67,18 +62,17 @@ sentencia   : declaracion
 
 declaracion : tipoSimple ID_ INSTREND_
                 {
-                    
-                        if (!insTdS($2, $1, dvar, -1)) {
-                            yyerror ("Identificador repetido");
-                        }
-                        else
-                        {
-                            dvar += TALLA_TIPO_SIMPLE;                    
-                        }
+                    if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
+                    {
+                        yyerror ("Identificador repetido");
+                    }
+                    else
+                    {
+                        actualizarDesplazamiento(TALLA_TIPO_SIMPLE);                    
+                    }
                 }
             | tipoSimple ID_ ASIG_ constante INSTREND_
                 {
-                    /*type Check*/
                     if($1 != $4.tipo)
                     {
                         sprintf(msgBuffer,
@@ -91,52 +85,50 @@ declaracion : tipoSimple ID_ INSTREND_
                     } 
                     else 
                     {
-                        
-                        if (!insTdS($2, $1, dvar, -1)) 
+                        if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
                         {
                             yyerror ("Identificador repetido");
                         } 
                         else 
                         { 
-                            dvar += TALLA_TIPO_SIMPLE;
+                            actualizarDesplazamiento(TALLA_TIPO_SIMPLE);
                         }
                     }
                 }
             | tipoSimple ID_ OBRA_ CTE_ CBRA_ INSTREND_
                 {
-                    int numelem = $4.valor;
+                    int talla_array = $4.valor;
+
                     if ($4.valor <= 0) {
                         yyerror("Talla inapropiada del array");
-                        numelem = 0;
+                        talla_array = 0;
                     }
-                    int refe = insTdA($1, numelem);
-                    if (!insTdS($2, T_ARRAY, dvar, refe)) {
+
+                    int referencia = insTdA($1, talla_array);
+
+                    if (!insTdS($2, T_ARRAY, dvar, referencia)) 
+                    {
                         yyerror ("Identificador repetido");
                     }
-                    else dvar += numelem * TALLA_TIPO_SIMPLE;
-
-
+                    else 
+                    {
+                        actualizarDesplazamiento(talla_array * TALLA_TIPO_SIMPLE);
+                    }
                 }
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             {
-                 int rc;
-                 rc = insTdS($5, T_RECORD, dvar, currentTDRRef);
-                 if(rc == FALSE)
-                 {
-                     sprintf(msgBuffer,"'%s' Identificador repetido", $5);
-                     yyerror (msgBuffer);
-                 }
-                 else
-                 {
-                     dvar += currentTDRoffset;
-                 }
+                if(!insTdS($5, T_RECORD, dvar, currentTDRRef);)
+                {
+                    sprintf(msgBuffer,"'%s' Identificador repetido", $5);
+                    yyerror (msgBuffer);
+                }
+                else
+                {
+                    dvar += currentTDRoffset;
+                }
 
-                 /*
-                    Los proximos campos que encontremos
-                    son de otra estructura, así que crearemos nueva tabla
-                 */
-                 currentTDRoffset = 0x00;
-                 currentTDRRef = TDR_MAKE_NEW_TABLE;
+                currentTDRoffset = 0x00;
+                currentTDRRef = TDR_MAKE_NEW_TABLE;
             }
             ;
 
@@ -599,3 +591,9 @@ operadorIncremento : INC_
                    | DEC_
                    ;
 %%
+
+
+void actualizarDesplazamiento(int talla)
+{
+    dvar += talla;
+}
