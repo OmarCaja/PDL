@@ -37,7 +37,6 @@ char msgBuffer[MSG_BUFFER_SIZE];
 %union {
     t_exp exp;
     int tipo;
-    int valor;
     char *nombre;
     t_listaCampos listaCampos;
 }
@@ -481,7 +480,7 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
                     }
-                    
+
                     if(simb.tipo != T_ENTERO && simb.tipo != T_LOGICO)
                     {
                         yyerror("El identificador debe ser de tipo simple");
