@@ -1,0 +1,40 @@
+// Test conversion bool a int
+{
+  int tt = 5;
+  bool bt = true;
+  tt = tt * bt;
+  tt = tt - bt;
+  tt = tt % bt;
+  tt = tt / bt;
+  tt += bt;
+  tt -= bt;
+  tt *= bt;
+  tt *= bt;
+  tt += tt;
+  tt -= tt;
+  tt *= tt;
+  tt /= tt;
+  tt++;
+  tt--;
+  bt = tt && bt;
+  bt = tt || bt;
+  bt = tt == bt;
+  bt = tt != bt;
+  bt = tt < bt;
+  bt = tt > bt;
+  bt = tt <= bt;
+  bt = tt >= bt;
+  bt = !tt;
+  bt++;
+  bt--;
+  int i = true;
+  bool b = 0;
+  i = 5 * true;
+  i = true + 5;
+  i = i + 5;
+  int  c[20];
+  c[1] = true;
+  struct { int  d1; bool d2; } d;
+  d.d1 = true;
+  d.d2 = 0;
+}

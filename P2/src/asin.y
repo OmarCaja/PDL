@@ -12,17 +12,6 @@
 #include "libtds.h"
 #include "header.h"
 
-/** **/
-#define MSG_BUFFER_SIZE 1024
-char msgBuffer[MSG_BUFFER_SIZE];
-/** una ref == -1 se usa para crear una nueva TDR*/
-#define TDR_MAKE_NEW_TABLE (-1)
-#define TDR_REDEFINE_ERROR (-1)
-/**Referencia que estamos usando en la tabla de registros**/
-static int currentTDRRef = TDR_MAKE_NEW_TABLE;
-/**Desplazamiento del campo*/
-static int currentTDRoffset = 0x00;
-
 %}
 
 %token MAS_ MENOS_ POR_ DIV_ MOD_
@@ -30,28 +19,24 @@ static int currentTDRoffset = 0x00;
 %token ASIG_ MASASIG_ MENOSASIG_ PORASIG_ DIVASIG_
 %token AND_ OR_ IGUAL_ DIFERENTE_ MAYOR_ MENOR_ MAYORIGUAL_ MENORIGUAL_ NEG_
 %token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ VERDADERO_ FALSO_
-%token INSTREND_ SEP_ INC_ DEC_ <nombre> ID_ <exp> CTE_
+%token INSTREND_ SEP_ INC_ DEC_ <nombre> ID_ <codigo> CTE_
 
-%type <tipo> tipoSimple
+%type <codigo> tipoSimple
+%type <tmp_var> expresion expresionLogica expresionIgualdad expresionRelacional
+%type <tmp_var> expresionAditiva expresionMultiplicativa
+%type <tmp_var> expresionUnaria expresionSufija
+%type <tmp_var> constante
+%type <codigo> operadorUnario;
+%type <listaCampos> listaCampos;
+
 
 %union {
-    t_exp exp;
-    int tipo;
-    int valor;
+    t_tmp_var tmp_var; // Preparado con la posicion para la generacion de CI
+    int codigo;
     char *nombre;
+    t_listaCampos listaCampos;
 }
 
-/*
-    Campo de la union vamos a utilizar para los no terminales
-    y para cada token
-*/
-
-%type <exp> expresion expresionLogica expresionIgualdad expresionRelacional
-%type <exp> expresionAditiva expresionMultiplicativa
-%type <exp> expresionUnaria expresionSufija
-%type <exp> constante instruccionSeleccion
-
-%type <valor> operadorUnario;
 %%
 
 programa    : OCUR_ secuenciaSentencias CCUR_
@@ -67,76 +52,62 @@ sentencia   : declaracion
 
 declaracion : tipoSimple ID_ INSTREND_
                 {
-                    
-                        if (!insTdS($2, $1, dvar, -1)) {
-                            yyerror ("Identificador repetido");
-                        }
-                        else
-                        {
-                            dvar += TALLA_TIPO_SIMPLE;                    
-                        }
+                    if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
+                    {
+                        yyerror ("Identificador repetido");
+                    }
+                    else
+                    {
+                        actualizarDesplazamiento(TALLA_TIPO_SIMPLE);                    
+                    }
                 }
             | tipoSimple ID_ ASIG_ constante INSTREND_
                 {
-                    /*type Check*/
+                    if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
+                    {
+                        yyerror ("Identificador repetido");
+                        break;
+                    }
+                    else 
+                    { 
+                        actualizarDesplazamiento(TALLA_TIPO_SIMPLE);
+                    }
+
                     if($1 != $4.tipo)
                     {
-                        sprintf(msgBuffer,
-                                "Can't assign"
-                                " ‘%s’ to ‘%s’",
-                                getExpTypeName($1),
-                                getExpTypeName($4.tipo)
-                                );
-                        yyerror(msgBuffer);
+                        yyerror("Error de tipos en la \"asignacion\"");
                     } 
-                    else 
-                    {
-                        
-                        if (!insTdS($2, $1, dvar, -1)) 
-                        {
-                            yyerror ("Identificador repetido");
-                        } 
-                        else 
-                        { 
-                            dvar += TALLA_TIPO_SIMPLE;
-                        }
-                    }
                 }
             | tipoSimple ID_ OBRA_ CTE_ CBRA_ INSTREND_
                 {
-                    int numelem = $4.valor;
-                    if ($4.valor <= 0) {
+                    int talla_array = $4;
+
+                    if ($4 <= 0) {
                         yyerror("Talla inapropiada del array");
-                        numelem = 0;
+                        talla_array = 0;
                     }
-                    int refe = insTdA($1, numelem);
-                    if (!insTdS($2, T_ARRAY, dvar, refe)) {
+
+                    int referencia = insTdA($1, talla_array);
+
+                    if (!insTdS($2, T_ARRAY, dvar, referencia)) 
+                    {
                         yyerror ("Identificador repetido");
                     }
-                    else dvar += numelem * TALLA_TIPO_SIMPLE;
-
-
+                    else 
+                    {
+                        actualizarDesplazamiento(talla_array * TALLA_TIPO_SIMPLE);
+                    }
                 }
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             {
-                 int rc;
-                 rc = insTdS($5, T_RECORD, dvar, currentTDRRef);
-                 if(rc == FALSE)
-                 {
-                     sprintf(msgBuffer,"'%s' Identificador repetido", $5);
-                     yyerror (msgBuffer);
-                 }
-                 else
-                 {
-                     dvar += currentTDRoffset;
-                 }
-
-                 /*
-                    Los proximos campos que encontremos
-                    son de otra estructura, así que crearemos nueva tabla
-                 */
-                 currentTDRoffset = 0x00;
-                 currentTDRRef = TDR_MAKE_NEW_TABLE;
+                if(!insTdS($5, T_RECORD, dvar, $3.referencia_struct))
+                {
+                    yyerror ("Identificador repetido");
+                }
+                else
+                {
+                    actualizarDesplazamiento($3.desplazamiento_campo);
+                }
             }
             ;
 
@@ -146,42 +117,34 @@ tipoSimple  : ENTERO_ { $$ = T_ENTERO; }
 
 listaCampos : tipoSimple ID_ INSTREND_
             {
-                int rc;
-                rc = insTdR(currentTDRRef, $2 , $1, currentTDRoffset);
-                if(currentTDRRef == TDR_MAKE_NEW_TABLE)
-                { /* Guardamos  la referencia a la nueva tabla*/
-                    currentTDRRef = rc;
-                    currentTDRoffset += TALLA_TIPO_SIMPLE;
-                    break;
-                }
-                /***/
-                if(rc == TDR_REDEFINE_ERROR)
-                { yyerror ("Campo repetido"); }
-                else
-                { currentTDRoffset += TALLA_TIPO_SIMPLE; }
+                int desplazamiento = 0;
+                $$.referencia_struct = insTdR(NUEVA_ESTRUCTURA, $2 , $1, desplazamiento);
+                $$.desplazamiento_campo = desplazamiento + TALLA_TIPO_SIMPLE;
             }
             | listaCampos tipoSimple ID_ INSTREND_
             {
-                int rc;
-                rc = insTdR(currentTDRRef, $3 , $2, currentTDRoffset);
-                if(currentTDRRef == TDR_MAKE_NEW_TABLE)
-                { /* Guardamos  la referencia a la nueva tabla*/
-                    currentTDRRef = rc;
-                    currentTDRoffset += TALLA_TIPO_SIMPLE;
-                    break;
+                int referencia;
+                int desplazamiento = $1.desplazamiento_campo;
+                referencia = insTdR($1.referencia_struct, $3 , $2, desplazamiento);
+
+                $$.referencia_struct = $1.referencia_struct;
+                
+                if(referencia == TDR_ERROR_CAMPO_EXISTENTE)
+                { 
+                    yyerror ("Campo repetido"); 
+                    $$.desplazamiento_campo = desplazamiento;
                 }
-                /***/
-                if(rc == TDR_REDEFINE_ERROR)
-                { yyerror ("Campo repetido"); }
                 else
-                { currentTDRoffset += TALLA_TIPO_SIMPLE; }
+                { 
+                    $$.desplazamiento_campo = desplazamiento + TALLA_TIPO_SIMPLE;
+                }
             }
             ;
 
 instruccion : OCUR_ CCUR_
             | OCUR_ listaInstrucciones CCUR_
             | instruccionEntradaSalida
-            | instruccionSeleccion {}
+            | instruccionSeleccion
             | instruccionIteracion
             | instruccionExpresion
             ;
@@ -207,40 +170,29 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                             {
                                 if($3.tipo != T_ENTERO && $3.tipo != T_ERROR)
                                 {
-                                    yyerror("La expresion del \"print\" debe ser \"entera\"");
+                                    yyerror("El argumento del \"print\" debe ser \"entero\"");
                                 }
                             }
                             ;
 
 instruccionSeleccion    : SI_ OPAR_ expresion CPAR_ 
                         {
-                            if ($3.tipo == T_ERROR)
-                            {
-                                $<exp>$.tipo = T_ERROR;
-                                break;
-                            }
-
-                            if ($3.tipo != T_LOGICO)
+                            if ($3.tipo != T_ERROR && $3.tipo != T_LOGICO)
                             {
                                 yyerror("La expresion de if debe ser logica");
-                                $<exp>$.tipo = T_ERROR;
                             }
                         }
                         instruccion SINO_ instruccion
-                        {
-                            $$.tipo = $<exp>5.tipo;
-                        }
                         ;
 
-instruccionIteracion    : MIENTRAS_ OPAR_ expresion 
+instruccionIteracion    : MIENTRAS_ OPAR_ expresion CPAR_
                         {
-                            if ($3.tipo != T_LOGICO)
+                            if ($3.tipo != T_ERROR && $3.tipo != T_LOGICO)
                             {
                                 yyerror("La expresion de while debe ser logica");
                             }
                         }
-                        
-                        CPAR_ instruccion
+                        instruccion
                         ;
 
 instruccionExpresion    : expresion INSTREND_ {}
@@ -258,7 +210,8 @@ expresion   : expresionLogica
 
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
-                        yyerror("Variable no declarada"); 
+                        yyerror("Variable no declarada");
+                        $$.tipo = T_ERROR; 
                         break;
                     }
 
@@ -280,12 +233,14 @@ expresion   : expresionLogica
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
+                        $$.tipo = T_ERROR;
                         break;
                     } 
                     
                     if (simb.tipo != T_ARRAY)
                     {
                         yyerror("El identificador debe ser de tipo \"array\"");
+                        $$.tipo = T_ERROR;
                         break;
                     }
 
@@ -357,7 +312,7 @@ expresionLogica : expresionIgualdad
                     }
                     else
                     {
-                        yyerror("Error en \"expresion logica\"");
+                        yyerror("Error de tipos en \"expresion logica\"");
                         $$.tipo = T_ERROR;
                     }
                  }
@@ -374,7 +329,7 @@ expresionIgualdad : expresionRelacional
                     /**/
                     if ($1.tipo != $3.tipo)
                     {
-                        yyerror("Error en \"expresion de igualdad\"");
+                        yyerror("Error de tipos en \"expresion de igualdad\"");
                         $$.tipo = T_ERROR;
                     }
                     /**/
@@ -392,7 +347,7 @@ expresionRelacional : expresionAditiva
                     /**/
                     if ($1.tipo != $3.tipo)
                     {
-                        yyerror("Error en \"expresion relacional\"");
+                        yyerror("Error de tipos en \"expresion relacional\"");
                         $$.tipo = T_ERROR;
                     }
                     /**/
@@ -442,7 +397,7 @@ expresionUnaria : expresionSufija
                     }
                     else
                     {
-                        yyerror("Error en \"expresion unaria\"");
+                        yyerror("Error de tipos en \"expresion unaria\"");
                         $$.tipo = T_ERROR;
                     }
                 }
@@ -490,20 +445,21 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         break;
                     }
 
-                    //$$ = $3;
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
                         $$.tipo = T_ERROR;
+                        break;
                     }
+
                     DIM dim = obtTdA(simb.ref);
-                    if($3.tipo != T_ENTERO && $3.tipo != T_ERROR)
+                    if($3.tipo != T_ENTERO)
                     {
                         yyerror("El indice del \"array\" debe ser entero");
+                        $$.tipo = T_ERROR;
+                        break;
                     }
                     $$.tipo = dim.telem;
-
-                    //$$.tipo = simb.tipo;
 
                 }
                 | ID_
@@ -511,13 +467,17 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
+                        $$.tipo = T_ERROR;
+                        break;
                     }
+
                     if(simb.tipo != T_ENTERO && simb.tipo != T_LOGICO)
                     {
                         yyerror("El identificador debe ser de tipo simple");
                         $$.tipo = T_ERROR;
                         break;
                     }
+
                     $$.tipo = simb.tipo;
                 }
                 | ID_ SEP_ ID_
@@ -547,17 +507,18 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                 ;
 
 constante : CTE_
+            {
+                $$.tipo = T_ENTERO;
+            }
           | VERDADERO_ 
-          {
-              $$.tipo = T_LOGICO;
-              $$.valor = 1;
-          }
+            {
+                $$.tipo = T_LOGICO;
+            }
           | FALSO_ 
-          {
-              $$.tipo = T_LOGICO;
-              $$.valor = 0;
-          }
-          ;  
+            {
+                $$.tipo = T_LOGICO;
+            }
+            ;  
 
 
 operadorAsignacion  : ASIG_
@@ -599,3 +560,9 @@ operadorIncremento : INC_
                    | DEC_
                    ;
 %%
+
+
+void actualizarDesplazamiento(int talla)
+{
+    dvar += talla;
+}

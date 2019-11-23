@@ -7,6 +7,7 @@
 #include "header.h"
 #include "libtds.h"
 
+int verTDS = FALSE;
 int verbosidad = FALSE;             /* Flag si se desea una traza            */
 int numErrores = 0;                 /* Contador del numero de errores        */
 
@@ -28,12 +29,6 @@ void yyerror(const char * msg)
 {
     numErrores++;  fflush(stdout);
     fprintf(stdout, "Error in line %d: %s\n", yylineno, msg);
-}
-/*****************************************************************************/
-void yywrap()
-{
-    printf("EOF\n");
-    exit (0);
 }
 
 /*****************************************************************************/
@@ -71,6 +66,10 @@ int main (int argc, char **argv)
         { fileArgNum = i+1; }
         else if (strcmp(argv[i], "--file") == 0)
         { fileArgNum = i+1; }
+        else if (strcmp(argv[i], "-t") == 0)
+        {
+            verTDS = TRUE;
+        }
     }
     char *filePath = argv[fileArgNum];
     /**********************************/
@@ -81,20 +80,19 @@ int main (int argc, char **argv)
         return(1);
     }
     //
-    if (verbosidad == TRUE)
+    if (verbosidad)
         fprintf(stdout,"%3d.- ", yylineno);
     //
     int rc;
     rc = yyparse ();
-    if (numErrores > 0) 
-        fprintf(stderr,"\n[ERROR]\tSyntax errors:\t%d\n", numErrores);
-    if( numErrores == 0
-        && rc == 0)
-        fprintf(stderr,"\n[INFO]\t\"%s\" parsed successfully :')\n",filePath);
-    if (verbosidad == TRUE)
+    if (verTDS)
     {
         verTdS();
     }
+    if (numErrores > 0) 
+        fprintf(stderr,"\n[ERROR]\tSyntax errors:\t%d\n", numErrores);
+    if (numErrores == 0 && rc == 0)
+        fprintf(stderr,"\n[INFO]\t\"%s\" parsed successfully :')\n",filePath);
     //
     return (0);
 }

@@ -10,6 +10,9 @@
 #define TRUE  1
 #define FALSE 0
 #define TALLA_TIPO_SIMPLE 1
+#define REF_TIPO_SIMPLE -1
+#define NUEVA_ESTRUCTURA -1
+#define TDR_ERROR_CAMPO_EXISTENTE -1
 /************************************* Variables externas definidas en el AL */
 extern int yylex();
 extern int yyparse();
@@ -41,12 +44,20 @@ extern const char *expTypeNameStr[];
  * t_exp
  * atributos de una expresion
 */
-typedef struct t_exp
-{
-    int valor;
-    int tipo;
-}t_exp;
 
+typedef struct
+{
+    int tipo;
+    int posicion;
+}t_tmp_var;
+
+typedef struct
+{
+    int referencia_struct;
+    int desplazamiento_campo;
+}t_listaCampos;
+
+void actualizarDesplazamiento(int talla);
 #endif  /* _HEADER_H */
 /*****************************************************************************/
 
