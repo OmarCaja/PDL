@@ -44,19 +44,19 @@ extern const char *expTypeNameStr[];
  * t_exp
  * atributos de una expresion
 */
-typedef struct t_exp
+typedef struct
 {
     int valor;
     int tipo;
-};
+}t_exp;
 
-typedef struct t_listaCampos
+typedef struct
 {
     int referencia_struct;
     int desplazamiento_campo;
-};
+}t_listaCampos;
 
-
+void actualizarDesplazamiento(int talla);
 #endif  /* _HEADER_H */
 /*****************************************************************************/
 
