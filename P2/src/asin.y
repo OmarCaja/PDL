@@ -198,15 +198,14 @@ instruccionSeleccion    : SI_ OPAR_ expresion CPAR_
                         instruccion SINO_ instruccion
                         ;
 
-instruccionIteracion    : MIENTRAS_ OPAR_ expresion 
+instruccionIteracion    : MIENTRAS_ OPAR_ expresion CPAR_
                         {
                             if ($3.tipo != T_ERROR && $3.tipo != T_LOGICO)
                             {
                                 yyerror("La expresion de while debe ser logica");
                             }
                         }
-                        
-                        CPAR_ instruccion
+                        instruccion
                         ;
 
 instruccionExpresion    : expresion INSTREND_ {}
