@@ -10,6 +10,7 @@ for file in ${TESTDIR}/*.c; do echo $file; done
 for file in ${TESTDIR}/*.c; do
 	echo "*******************************************************************************";
 	echo "Testing: $file...." ;
+	grep // $file -n
 	./menoscc -f $file ${MENOSCCFLAGS};
 done
 echo "Test complete! ^.^"
