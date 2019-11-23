@@ -7,14 +7,15 @@ SRCDIR = src
 INCDIR = include
 LIBDIR = lib
 # Opciones de compilacion
-COPT = -Wall
+COPT = -Wall -g
 CLIB = -lfl -ltds -lgci
-OBJS = ./alex.o  ./asin.o ./principal.o 
+OBJS = ./alex.o  ./asin.o ./main.o 
+YACCFLAGS = --debug --verbose
 #
-cmc:	$(OBJS)  $(LIBDIR)/libtds.a  $(LIBDIR)/libgci.a
-	gcc $(OBJS) -I$(INCDIR) -L$(LIBDIR) $(COPT) $(CLIB) -o cmc
-principal.o: $(SRCDIR)/principal.c
-	gcc  -I$(INCDIR) $(COPT) -c $(SRCDIR)/principal.c
+menoscc:	$(OBJS)  $(LIBDIR)/libtds.a  $(LIBDIR)/libgci.a
+	gcc $(OBJS) -I$(INCDIR) -L$(LIBDIR) $(COPT) $(CLIB) -o menoscc
+main.o: $(SRCDIR)/main.c
+	gcc  -I$(INCDIR) $(COPT) -c $(SRCDIR)/main.c
 asin.o:	asin.c
 	gcc  -I$(INCDIR) $(COPT) -c asin.c
 alex.o:	alex.c asin.c

@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "header.h"
-#include "libgci.h"
 #include "libtds.h"
 
 int verTDS = FALSE;
@@ -68,7 +67,9 @@ int main (int argc, char **argv)
         else if (strcmp(argv[i], "--file") == 0)
         { fileArgNum = i+1; }
         else if (strcmp(argv[i], "-t") == 0)
-        { verTDS = TRUE; }
+        {
+            verTDS = TRUE;
+        }
     }
     char *filePath = argv[fileArgNum];
     /**********************************/
@@ -79,12 +80,12 @@ int main (int argc, char **argv)
         return(1);
     }
     //
-    if (verbosidad == TRUE)
+    if (verbosidad)
         fprintf(stdout,"%3d.- ", yylineno);
     //
     int rc;
     rc = yyparse ();
-    if (verTDS == TRUE)
+    if (verTDS)
     {
         verTdS();
     }
