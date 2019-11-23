@@ -160,7 +160,7 @@ listaCampos : tipoSimple ID_ INSTREND_
                 }
                 /***/
                 if(rc == TDR_REDEFINE_ERROR)
-                { yyerror ("Identificador repetido"); }
+                { yyerror ("Campo repetido"); }
                 else
                 { currentTDRoffset += TALLA_TIPO_SIMPLE; }
             }
@@ -176,7 +176,7 @@ listaCampos : tipoSimple ID_ INSTREND_
                 }
                 /***/
                 if(rc == TDR_REDEFINE_ERROR)
-                { yyerror ("Identificador repetido"); }
+                { yyerror ("Campo repetido"); }
                 else
                 { currentTDRoffset += TALLA_TIPO_SIMPLE; }
             }
@@ -519,6 +519,8 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     if(simb.tipo != T_ENTERO && simb.tipo != T_LOGICO)
                     {
                         yyerror("El identificador debe ser de tipo simple");
+                        $$.tipo = T_ERROR;
+                        break;
                     }
                     $$.tipo = simb.tipo;
                 }
