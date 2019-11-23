@@ -112,7 +112,7 @@ declaracion : tipoSimple ID_ INSTREND_
                 }
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             {
-                if(!insTdS($5, T_RECORD, dvar, $1.referencia_struct);)
+                if(!insTdS($5, T_RECORD, dvar, $3.referencia_struct);)
                 {
                     sprintf(msgBuffer,"'%s' Identificador repetido", $5);
                     yyerror (msgBuffer);
