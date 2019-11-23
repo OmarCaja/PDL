@@ -23,9 +23,9 @@ char msgBuffer[MSG_BUFFER_SIZE];
 %token ASIG_ MASASIG_ MENOSASIG_ PORASIG_ DIVASIG_
 %token AND_ OR_ IGUAL_ DIFERENTE_ MAYOR_ MENOR_ MAYORIGUAL_ MENORIGUAL_ NEG_
 %token ENTERO_ BOOLEAN_ ESTRUCTURA_ LEER_ IMPRIMIR_ SI_ MIENTRAS_ SINO_ VERDADERO_ FALSO_
-%token INSTREND_ SEP_ INC_ DEC_ <nombre> ID_ <exp> CTE_
+%token INSTREND_ SEP_ INC_ DEC_ <nombre> ID_ <codigo> CTE_
 
-%type <tipo_simple> tipoSimple
+%type <codigo> tipoSimple
 %type <tmp_var> expresion expresionLogica expresionIgualdad expresionRelacional
 %type <tmp_var> expresionAditiva expresionMultiplicativa
 %type <tmp_var> expresionUnaria expresionSufija
@@ -35,9 +35,7 @@ char msgBuffer[MSG_BUFFER_SIZE];
 
 
 %union {
-    t_exp exp;
     t_tmp_var tmp_var; // Preparado con la posicion para la generacion de CI
-    int tipo_simple;
     int codigo;
     char *nombre;
     t_listaCampos listaCampos;
@@ -93,9 +91,9 @@ declaracion : tipoSimple ID_ INSTREND_
                 }
             | tipoSimple ID_ OBRA_ CTE_ CBRA_ INSTREND_
                 {
-                    int talla_array = $4.valor;
+                    int talla_array = $4;
 
-                    if ($4.valor <= 0) {
+                    if ($4 <= 0) {
                         yyerror("Talla inapropiada del array");
                         talla_array = 0;
                     }
@@ -519,17 +517,18 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                 ;
 
 constante : CTE_
+            {
+                $$.tipo = T_ENTERO;
+            }
           | VERDADERO_ 
-          {
-              $$.tipo = T_LOGICO;
-              $$.valor = 1;
-          }
+            {
+                $$.tipo = T_LOGICO;
+            }
           | FALSO_ 
-          {
-              $$.tipo = T_LOGICO;
-              $$.valor = 0;
-          }
-          ;  
+            {
+                $$.tipo = T_LOGICO;
+            }
+            ;  
 
 
 operadorAsignacion  : ASIG_

@@ -44,11 +44,6 @@ extern const char *expTypeNameStr[];
  * t_exp
  * atributos de una expresion
 */
-typedef struct
-{
-    int valor;
-    int tipo;
-}t_exp;
 
 typedef struct
 {
