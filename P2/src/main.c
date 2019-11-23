@@ -7,6 +7,7 @@
 #include "header.h"
 #include "libtds.h"
 
+int verTDS = FALSE;
 int verbosidad = FALSE;             /* Flag si se desea una traza            */
 int numErrores = 0;                 /* Contador del numero de errores        */
 
@@ -65,6 +66,10 @@ int main (int argc, char **argv)
         { fileArgNum = i+1; }
         else if (strcmp(argv[i], "--file") == 0)
         { fileArgNum = i+1; }
+        else if (strcmp(argv[i], "-t") == 0)
+        {
+            verTDS = TRUE;
+        }
     }
     char *filePath = argv[fileArgNum];
     /**********************************/
@@ -75,12 +80,12 @@ int main (int argc, char **argv)
         return(1);
     }
     //
-    if (verbosidad == TRUE)
+    if (verbosidad)
         fprintf(stdout,"%3d.- ", yylineno);
     //
     int rc;
     rc = yyparse ();
-    if (verbosidad == TRUE)
+    if (verTDS)
     {
         verTdS();
     }

@@ -12,10 +12,6 @@
 #include "libtds.h"
 #include "header.h"
 
-/** **/
-#define MSG_BUFFER_SIZE 1024
-char msgBuffer[MSG_BUFFER_SIZE];
-
 %}
 
 %token MAS_ MENOS_ POR_ DIV_ MOD_
@@ -67,27 +63,20 @@ declaracion : tipoSimple ID_ INSTREND_
                 }
             | tipoSimple ID_ ASIG_ constante INSTREND_
                 {
+                    if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
+                    {
+                        yyerror ("Identificador repetido");
+                        break;
+                    }
+                    else 
+                    { 
+                        actualizarDesplazamiento(TALLA_TIPO_SIMPLE);
+                    }
+
                     if($1 != $4.tipo)
                     {
-                        sprintf(msgBuffer,
-                                "No se pudo asignar"
-                                " ‘%s’ a ‘%s’",
-                                getExpTypeName($1),
-                                getExpTypeName($4.tipo)
-                                );
-                        yyerror(msgBuffer);
+                        yyerror("Error de tipos en la \"asignacion\"");
                     } 
-                    else 
-                    {
-                        if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
-                        {
-                            yyerror ("Identificador repetido");
-                        } 
-                        else 
-                        { 
-                            actualizarDesplazamiento(TALLA_TIPO_SIMPLE);
-                        }
-                    }
                 }
             | tipoSimple ID_ OBRA_ CTE_ CBRA_ INSTREND_
                 {
@@ -113,8 +102,7 @@ declaracion : tipoSimple ID_ INSTREND_
             {
                 if(!insTdS($5, T_RECORD, dvar, $3.referencia_struct))
                 {
-                    sprintf(msgBuffer,"'%s' Identificador repetido", $5);
-                    yyerror (msgBuffer);
+                    yyerror ("Identificador repetido");
                 }
                 else
                 {
@@ -479,6 +467,8 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     SIMB simb = obtTdS($1);
                     if (simb.tipo == T_ERROR) {
                         yyerror("Variable no declarada");
+                        $$.tipo = T_ERROR;
+                        break;
                     }
 
                     if(simb.tipo != T_ENTERO && simb.tipo != T_LOGICO)
