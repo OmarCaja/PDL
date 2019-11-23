@@ -132,6 +132,9 @@ declaracion : tipoSimple ID_ INSTREND_
                  {
                      dvar += currentTDRoffset;
                  }
+                 if(yydebug)
+                    verTdS();
+
                  /*
                     Los proximos campos que encontremos
                     son de otra estructura, así que crearemos nueva tabla
@@ -146,6 +149,21 @@ tipoSimple  : ENTERO_ { $$ = T_ENTERO; }
             ; 
 
 listaCampos : tipoSimple ID_ INSTREND_
+            {
+                int rc;
+                rc = insTdR(currentTDRRef, $2 , $1, currentTDRoffset);
+                if(currentTDRRef == TDR_MAKE_NEW_TABLE)
+                { /* Guardamos  la referencia a la nueva tabla*/
+                    currentTDRRef = rc;
+                    currentTDRoffset += TALLA_TIPO_SIMPLE;
+                    break;
+                }
+                /***/
+                if(rc == TDR_REDEFINE_ERROR)
+                { yyerror ("Identificador repetido"); }
+                else
+                { currentTDRoffset += TALLA_TIPO_SIMPLE; }
+            }
             | listaCampos tipoSimple ID_ INSTREND_
             {
                 int rc;
