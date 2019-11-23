@@ -75,7 +75,6 @@ declaracion : tipoSimple ID_ INSTREND_
                         {
                             dvar += TALLA_TIPO_SIMPLE;                    
                         }
-                        verTdS();
                 }
             | tipoSimple ID_ ASIG_ constante INSTREND_
                 {
@@ -121,7 +120,6 @@ declaracion : tipoSimple ID_ INSTREND_
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             {
                  int rc;
-                 printf("%s\n",$5);
                  rc = insTdS($5, T_RECORD, dvar, currentTDRRef);
                  if(rc == FALSE)
                  {
@@ -132,8 +130,6 @@ declaracion : tipoSimple ID_ INSTREND_
                  {
                      dvar += currentTDRoffset;
                  }
-                 if(yydebug)
-                    verTdS();
 
                  /*
                     Los proximos campos que encontremos

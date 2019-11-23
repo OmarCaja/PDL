@@ -90,6 +90,10 @@ int main (int argc, char **argv)
     if( numErrores == 0
         && rc == 0)
         fprintf(stderr,"\n[INFO]\t\"%s\" parsed successfully :')\n",filePath);
+    if (yydebug)
+    {
+        verTdS();
+    }
     //
     return (0);
 }
