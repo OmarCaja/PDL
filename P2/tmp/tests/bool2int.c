@@ -1,5 +1,32 @@
 // Test conversion bool a int
 {
+  int tt = 5;
+  bool bt = true;
+  tt = tt * bt;
+  tt = tt - bt;
+  tt = tt % bt;
+  tt = tt / bt;
+  tt += bt;
+  tt -= bt;
+  tt *= bt;
+  tt *= bt;
+  tt += tt;
+  tt -= tt;
+  tt *= tt;
+  tt /= tt;
+  tt++;
+  tt--;
+  bt = tt && bt;
+  bt = tt || bt;
+  bt = tt == bt;
+  bt = tt != bt;
+  bt = tt < bt;
+  bt = tt > bt;
+  bt = tt <= bt;
+  bt = tt >= bt;
+  bt = !tt;
+  bt++;
+  bt--;
   int i = true;
   bool b = 0;
   i = 5 * true;
