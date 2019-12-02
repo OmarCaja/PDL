@@ -54,7 +54,7 @@ declaracion : tipoSimple ID_ INSTREND_
                 {
                     if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
                     {
-                        yyerror ("Identificador repetido");
+                        yyerror("Identificador repetido");
                     }
                     else
                     {
@@ -164,7 +164,7 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                                 {
                                     yyerror("El argumento del \"read\" debe ser \"entero\"");
                                 }
-
+                                emite(EREAD,crArgNul(),crArgNul(),crArgPos(simb.ref));
                             }
                             | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
                             {
@@ -172,6 +172,7 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                                 {
                                     yyerror("El argumento del \"print\" debe ser \"entero\"");
                                 }
+                                emite(EWRITE,crArgNul(),crArgNul(),crArgPos($3.posicion));
                             }
                             ;
 
