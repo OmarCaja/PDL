@@ -57,6 +57,12 @@ typedef struct
     int desplazamiento_campo;
 }t_listaCampos;
 
+typedef struct
+{
+    int falso;
+    int fin;
+}t_ins_sel;
+
 void actualizarDesplazamiento(int talla);
 #endif  /* _HEADER_H */
 /*****************************************************************************/
