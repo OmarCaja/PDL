@@ -28,6 +28,7 @@
 %type <tmp_var> constante
 %type <codigo> operadorUnario;
 %type <listaCampos> listaCampos;
+%type <codigo> operadorAsignacion;
 
 
 %union {
@@ -221,6 +222,7 @@ expresion   : expresionLogica
                         $$.tipo = T_ERROR;
                         break;
                     }
+                    emitirAsignacion(buscaPos($1), $2, $3.pos);
                 }
             | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
                 {
@@ -521,11 +523,11 @@ constante : CTE_
             ;  
 
 
-operadorAsignacion  : ASIG_
-                    | MASASIG_
-                    | MENOSASIG_
-                    | PORASIG_
-                    | DIVASIG_
+operadorAsignacion  : ASIG_ { $$ = 0; }
+                    | MASASIG_ { $$ = 1; }
+                    | MENOSASIG_ { $$ = 2; }
+                    | PORASIG_ { $$ = 3; }
+                    | DIVASIG_ { $$ = 4; }
                     ; 
 
 operadorLogico : AND_
@@ -565,4 +567,21 @@ operadorIncremento : INC_
 void actualizarDesplazamiento(int talla)
 {
     dvar += talla;
+}
+
+int buscaPos(char* id)
+{
+    obtTdS(id).desp;
+}
+
+void emitirAsignacion(int idPos, int asigCode, int expPos)
+{
+    if (asigCode == 0)
+    {
+        emite(EASIG, crAgrPos(idPos), )
+    }
+    else
+    {
+
+    }
 }
