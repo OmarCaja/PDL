@@ -325,6 +325,7 @@ expresionIgualdad : expresionRelacional
                     if ($1.tipo == T_ERROR || $3.tipo == T_ERROR)
                     {
                         $$.tipo = T_ERROR;
+                        break;
                     }
                     /**/
                     if ($1.tipo != $3.tipo)
@@ -343,6 +344,7 @@ expresionRelacional : expresionAditiva
                     if ($1.tipo == T_ERROR || $3.tipo == T_ERROR)
                     {
                         $$.tipo = T_ERROR;
+                        break;
                     }
                     /**/
                     if ($1.tipo != $3.tipo)
@@ -357,9 +359,12 @@ expresionRelacional : expresionAditiva
 expresionAditiva : expresionMultiplicativa 
                  | expresionAditiva operadorAditivo expresionMultiplicativa
                  {
-                    $$.tipo = $1.tipo;
-                    if($1.tipo == T_ERROR)
-                    { break; }
+                    $$.tipo = T_ENTERO;
+                    if ($1.tipo == T_ERROR || $3.tipo == T_ERROR)
+                    {
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
                     
                     if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                     {
@@ -376,6 +381,13 @@ expresionAditiva : expresionMultiplicativa
 expresionMultiplicativa : expresionUnaria
                         | expresionMultiplicativa operadorMultiplicativo expresionUnaria
                         {
+                            $$.tipo = T_ENTERO;
+                            if ($1.tipo == T_ERROR || $3.tipo == T_ERROR)
+                            {
+                                $$.tipo = T_ERROR;
+                                break;
+                            }
+
                             if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                             {
                                $$.tipo = $1.tipo;
@@ -391,6 +403,11 @@ expresionMultiplicativa : expresionUnaria
 expresionUnaria : expresionSufija
                 | operadorUnario expresionUnaria 
                 { 
+                    if($2.tipo == T_ERROR){
+                        $$.tipo = T_ERROR;
+                        break;
+                    }
+
                     if (($2.tipo == T_ENTERO && $1 != 0) || ($2.tipo == T_LOGICO && $1 == 0))
                     {
                         $$.tipo = $2.tipo;
