@@ -39,7 +39,7 @@
 
 %%
 
-programa    : OCUR_ secuenciaSentencias CCUR_
+programa    : OCUR_ secuenciaSentencias CCUR_ { emite(FIN, crArgNul(), crArgNul(), crArgNul()); }
             ;   
 
 secuenciaSentencias : sentencia

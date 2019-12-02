@@ -40,7 +40,7 @@ typedef struct tipo_arg /****** Estructura para los argumentos del codigo 3D */
 {              
   int tipo;        /* Tipo del argumento: entero, posicion, etiqueta o nulo  */
   int val;         /* valor del argumento: entero, posicion, etiqueta o nulo */
-}TIPO_ARG;
+}TIPO_ARG; //NO SE UTILIZA USAR LAS FUNCIONES DE ABAJO
 
 /*************** Funciones para crear los argumentos de las instrucciones 3D */
 TIPO_ARG crArgNul () ;
@@ -75,7 +75,7 @@ void emite (int cop, TIPO_ARG arg1, TIPO_ARG arg2, TIPO_ARG res);
 int creaVarTemp ();
 /*  Crea una variable temporal de tipo simple (TALLA_TIPO_SIMPLE = 1), en el 
     segmento de variables (indicado por "dvar") y devuelve su desplazamiento 
-    relativo. A continuacón, incrementa "dvar".                              */
+    relativo. A continuacï¿½n, incrementa "dvar".                              */
 
 void volcarCodigo(char *nom) ;
 /* Vuelca (en modo texto) el codigo generado en un fichero cuyo nombre es el 
