@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "libtds.h"
 #include "header.h"
+#include "libgci.h"
 
 %}
 
@@ -41,7 +42,7 @@
 
 %%
 
-programa    : OCUR_ secuenciaSentencias CCUR_ { emite(FIN, crArgNul(), crArgNul(), crArgNul()); }
+programa    : OCUR_ secuenciaSentencias CCUR_ { emite(FIN, crArgNul(), crArgNul(), crArgNul()); volcarCodigo("foobar");}
             ;   
 
 secuenciaSentencias : sentencia
@@ -78,7 +79,12 @@ declaracion : tipoSimple ID_ INSTREND_
                     if($1 != $4.tipo)
                     {
                         yyerror("Error de tipos en la \"asignacion\"");
-                    } 
+                    }
+                    else
+                    {
+                        SIMB _simb = obtTdS($2);
+                        emite (EASIG, crArgEnt($4.valor) , crArgNul(), crArgPos(_simb.desp));
+                    }
                 }
             | tipoSimple ID_ OBRA_ CTE_ CBRA_ INSTREND_
                 {
@@ -238,6 +244,7 @@ expresion   : expresionLogica
                         $$.tipo = T_ERROR;
                         break;
                     }
+                    $$.tipo = T_ENTERO;
                 }
             | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
                 {
@@ -276,6 +283,7 @@ expresion   : expresionLogica
                         $$.tipo = T_ERROR;
                         break;
                     }
+                    $$.tipo = T_ENTERO;
 
                 }
             | ID_ SEP_ ID_ operadorAsignacion expresion
@@ -311,7 +319,8 @@ expresion   : expresionLogica
                         yyerror("Error de tipos en la \"asignacion\"");
                         $$.tipo = T_ERROR;
                         break;
-                    }                  
+                    }
+                    $$.tipo = T_ENTERO;
                 }
             ;  
 
@@ -433,6 +442,7 @@ expresionUnaria : expresionSufija
                         $$.tipo = T_ERROR;
                         break;
                     }
+                    $$.tipo = T_ENTERO;
                 }
                 ;
 
@@ -452,6 +462,7 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         $$.tipo = T_ERROR;
                         break;
                     }
+                    $$.tipo = T_ENTERO;
                 }
 
                 | ID_ OBRA_ expresion CBRA_ 
@@ -526,14 +537,17 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
 constante : CTE_
             {
                 $$.tipo = T_ENTERO;
+                $$.valor = $1;
             }
           | VERDADERO_ 
             {
                 $$.tipo = T_LOGICO;
+                $$.valor = 1;
             }
           | FALSO_ 
             {
                 $$.tipo = T_LOGICO;
+                $$.valor = 0;
             }
             ;  
 
