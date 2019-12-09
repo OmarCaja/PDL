@@ -29,6 +29,7 @@
 %type <codigo> operadorUnario;
 %type <listaCampos> listaCampos;
 %type <ins_sel> instruccionSeleccion;
+%type <ins_iter> instruccionIteracion;
 
 
 %union {
@@ -37,6 +38,7 @@
     char *nombre;
     t_listaCampos listaCampos;
     t_ins_sel ins_sel;
+    t_ins_iter ins_iter;
 }
 
 %%
@@ -202,14 +204,26 @@ instruccionSeleccion    : SI_ OPAR_ expresion CPAR_
                          }
                         ;
 
-instruccionIteracion    : MIENTRAS_ OPAR_ expresion CPAR_
+instruccionIteracion    : MIENTRAS_
+                        {
+                            $$.ini = creaLans(si);
+
+                        }
+                        
+                         OPAR_ expresion CPAR_
                         {
                             if ($3.tipo != T_ERROR && $3.tipo != T_LOGICO)
                             {
                                 yyerror("La expresion de while debe ser logica");
                             }
+                            $$.fin = creaLans(si);
+                            emite(EIGUAL,crArgPos($4.posicion),crArgEnt(0),---);
                         }
                         instruccion
+                        {
+                            emite(GOTOS,crArgNul,crArgNul,$$.ini);
+                            completaLans($$.fin,si);
+                        }
                         ;
 
 instruccionExpresion    : expresion INSTREND_ {}

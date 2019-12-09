@@ -63,6 +63,12 @@ typedef struct
     int fin;
 }t_ins_sel;
 
+typedef struct
+{
+    int ini;
+    int fin;
+}t_ins_iter
+
 void actualizarDesplazamiento(int talla);
 #endif  /* _HEADER_H */
 /*****************************************************************************/
