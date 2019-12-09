@@ -28,6 +28,7 @@
 %type <tmp_var> constante
 %type <codigo> operadorUnario;
 %type <listaCampos> listaCampos;
+%type <ins_sel> instruccionSeleccion;
 
 
 %union {
@@ -35,6 +36,7 @@
     int codigo;
     char *nombre;
     t_listaCampos listaCampos;
+    t_ins_sel ins_sel;
 }
 
 %%
@@ -62,12 +64,12 @@ declaracion : tipoSimple ID_ INSTREND_
                     }
                 }
             | tipoSimple ID_ ASIG_ constante INSTREND_
-                {
+                { 
                     if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
                     {
                         yyerror ("Identificador repetido");
                         break;
-                    }
+                    } 
                     else 
                     { 
                         actualizarDesplazamiento(TALLA_TIPO_SIMPLE);
@@ -97,7 +99,7 @@ declaracion : tipoSimple ID_ INSTREND_
                     {
                         actualizarDesplazamiento(talla_array * TALLA_TIPO_SIMPLE);
                     }
-                }
+                } 
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             {
                 if(!insTdS($5, T_RECORD, dvar, $3.referencia_struct))
@@ -182,8 +184,22 @@ instruccionSeleccion    : SI_ OPAR_ expresion CPAR_
                             {
                                 yyerror("La expresion de if debe ser logica");
                             }
+
+                            $$.falso = creaLans(si);
+                            emite(EIGUAL,crArgPos($3.posicion),crArgEnt (0),---);
                         }
-                        instruccion SINO_ instruccion
+                        instruccion
+                        {
+                            $$.fin = creaLans(si);
+                            emite(GOTOS,crArgNul(),crArgNul(),----);
+                            completaLans($$.falso,si);
+
+                        }
+                        
+                         SINO_ instruccion
+                         {
+                            completaLans($$.fin,si);
+                         }
                         ;
 
 instruccionIteracion    : MIENTRAS_ OPAR_ expresion CPAR_
