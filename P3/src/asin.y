@@ -171,7 +171,7 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                                 {
                                     yyerror("El argumento del \"read\" debe ser \"entero\"");
                                 }
-                                emite(EREAD,crArgNul(),crArgNul(),crArgPos(simb.ref));
+                                emite(EREAD,crArgNul(),crArgNul(),crArgPos(simb.desp));
                             }
                             | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
                             {
@@ -209,7 +209,7 @@ instruccionSeleccion    : SI_ OPAR_ expresion CPAR_
 
 instruccionIteracion    : MIENTRAS_
                         {
-                            $<etiqueta>$ = creaLans(si);
+                            $<etiqueta>$ = si;
                         }
                         
                          OPAR_ expresion CPAR_
