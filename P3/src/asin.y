@@ -436,6 +436,7 @@ expresionUnaria : expresionSufija
                 { 
                     if (($2.tipo == T_ENTERO && $1 != 0) || ($2.tipo == T_LOGICO && $1 == 0))
                     {
+                        switch ($1)
                         $$.tipo = $2.tipo;
                     }
                     else
@@ -528,6 +529,7 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     }
 
                     $$.tipo = simb.tipo;
+                    $$.pos = simb.desp;
                 }
                 | ID_ SEP_ ID_
                 {
