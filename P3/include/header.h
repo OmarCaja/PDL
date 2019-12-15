@@ -49,6 +49,7 @@ typedef struct
 {
     int tipo;
     int posicion;
+    int valor;
 }t_tmp_var;
 
 typedef struct
@@ -56,6 +57,18 @@ typedef struct
     int referencia_struct;
     int desplazamiento_campo;
 }t_listaCampos;
+
+typedef struct
+{
+    int falso;
+    int fin;
+}t_ins_sel;
+
+typedef struct
+{
+    int ini;
+    int fin;
+}t_ins_iter
 
 void actualizarDesplazamiento(int talla);
 #endif  /* _HEADER_H */

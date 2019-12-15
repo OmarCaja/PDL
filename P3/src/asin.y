@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "libtds.h"
 #include "header.h"
+#include "libgci.h"
 
 %}
 
@@ -29,6 +30,8 @@
 %type <codigo> operadorUnario;
 %type <listaCampos> listaCampos;
 %type <codigo> operadorAsignacion;
+%type <ins_sel> instruccionSeleccion;
+%type <ins_iter> instruccionIteracion;
 
 
 %union {
@@ -36,11 +39,13 @@
     int codigo;
     char *nombre;
     t_listaCampos listaCampos;
+    t_ins_sel ins_sel;
+    t_ins_iter ins_iter;
 }
 
 %%
 
-programa    : OCUR_ secuenciaSentencias CCUR_ { emite(FIN, crArgNul(), crArgNul(), crArgNul()); }
+programa    : OCUR_ secuenciaSentencias CCUR_ { emite(FIN, crArgNul(), crArgNul(), crArgNul()); volcarCodigo("foobar");}
             ;   
 
 secuenciaSentencias : sentencia
@@ -55,7 +60,7 @@ declaracion : tipoSimple ID_ INSTREND_
                 {
                     if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
                     {
-                        yyerror ("Identificador repetido");
+                        yyerror("Identificador repetido");
                     }
                     else
                     {
@@ -63,12 +68,12 @@ declaracion : tipoSimple ID_ INSTREND_
                     }
                 }
             | tipoSimple ID_ ASIG_ constante INSTREND_
-                {
+                { 
                     if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
                     {
                         yyerror ("Identificador repetido");
                         break;
-                    }
+                    } 
                     else 
                     { 
                         actualizarDesplazamiento(TALLA_TIPO_SIMPLE);
@@ -77,7 +82,12 @@ declaracion : tipoSimple ID_ INSTREND_
                     if($1 != $4.tipo)
                     {
                         yyerror("Error de tipos en la \"asignacion\"");
-                    } 
+                    }
+                    else
+                    {
+                        SIMB _simb = obtTdS($2);
+                        emite (EASIG, crArgEnt($4.valor) , crArgNul(), crArgPos(_simb.desp));
+                    }
                 }
             | tipoSimple ID_ OBRA_ CTE_ CBRA_ INSTREND_
                 {
@@ -98,7 +108,7 @@ declaracion : tipoSimple ID_ INSTREND_
                     {
                         actualizarDesplazamiento(talla_array * TALLA_TIPO_SIMPLE);
                     }
-                }
+                } 
             | ESTRUCTURA_ OCUR_ listaCampos CCUR_ ID_ INSTREND_
             {
                 if(!insTdS($5, T_RECORD, dvar, $3.referencia_struct))
@@ -165,7 +175,7 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                                 {
                                     yyerror("El argumento del \"read\" debe ser \"entero\"");
                                 }
-
+                                emite(EREAD,crArgNul(),crArgNul(),crArgPos(simb.ref));
                             }
                             | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
                             {
@@ -173,6 +183,7 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                                 {
                                     yyerror("El argumento del \"print\" debe ser \"entero\"");
                                 }
+                                emite(EWRITE,crArgNul(),crArgNul(),crArgPos($3.posicion));
                             }
                             ;
 
@@ -182,18 +193,44 @@ instruccionSeleccion    : SI_ OPAR_ expresion CPAR_
                             {
                                 yyerror("La expresion de if debe ser logica");
                             }
+
+                            $$.falso = creaLans(si);
+                            emite(EIGUAL,crArgPos($3.posicion),crArgEnt (0),---);
                         }
-                        instruccion SINO_ instruccion
+                        instruccion
+                        {
+                            $$.fin = creaLans(si);
+                            emite(GOTOS,crArgNul(),crArgNul(),----);
+                            completaLans($$.falso,si);
+
+                        }
+                        
+                         SINO_ instruccion
+                         {
+                            completaLans($$.fin,si);
+                         }
                         ;
 
-instruccionIteracion    : MIENTRAS_ OPAR_ expresion CPAR_
+instruccionIteracion    : MIENTRAS_
+                        {
+                            $$.ini = creaLans(si);
+
+                        }
+                        
+                         OPAR_ expresion CPAR_
                         {
                             if ($3.tipo != T_ERROR && $3.tipo != T_LOGICO)
                             {
                                 yyerror("La expresion de while debe ser logica");
                             }
+                            $$.fin = creaLans(si);
+                            emite(EIGUAL,crArgPos($4.posicion),crArgEnt(0),---);
                         }
                         instruccion
+                        {
+                            emite(GOTOS,crArgNul,crArgNul,$$.ini);
+                            completaLans($$.fin,si);
+                        }
                         ;
 
 instruccionExpresion    : expresion INSTREND_ {}
@@ -223,6 +260,7 @@ expresion   : expresionLogica
                         break;
                     }
                     emitirAsignacion(buscaPos($1), $2, $3.pos);
+                    $$.tipo = T_ENTERO;
                 }
             | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
                 {
@@ -261,6 +299,7 @@ expresion   : expresionLogica
                         $$.tipo = T_ERROR;
                         break;
                     }
+                    $$.tipo = T_ENTERO;
 
                 }
             | ID_ SEP_ ID_ operadorAsignacion expresion
@@ -296,7 +335,8 @@ expresion   : expresionLogica
                         yyerror("Error de tipos en la \"asignacion\"");
                         $$.tipo = T_ERROR;
                         break;
-                    }                  
+                    }
+                    $$.tipo = T_ENTERO;
                 }
             ;  
 
@@ -418,6 +458,7 @@ expresionUnaria : expresionSufija
                         $$.tipo = T_ERROR;
                         break;
                     }
+                    $$.tipo = T_ENTERO;
                 }
                 ;
 
@@ -437,6 +478,7 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         $$.tipo = T_ERROR;
                         break;
                     }
+                    $$.tipo = T_ENTERO;
                 }
 
                 | ID_ OBRA_ expresion CBRA_ 
@@ -511,14 +553,17 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
 constante : CTE_
             {
                 $$.tipo = T_ENTERO;
+                $$.valor = $1;
             }
           | VERDADERO_ 
             {
                 $$.tipo = T_LOGICO;
+                $$.valor = 1;
             }
           | FALSO_ 
             {
                 $$.tipo = T_LOGICO;
+                $$.valor = 0;
             }
             ;  
 
