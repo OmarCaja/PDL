@@ -27,9 +27,8 @@
 %type <tmp_var> expresionAditiva expresionMultiplicativa
 %type <tmp_var> expresionUnaria expresionSufija
 %type <tmp_var> constante
-%type <codigo> operadorUnario;
+%type <codigo> operadorUnario operadorIncremento operadorAsignacion;
 %type <listaCampos> listaCampos;
-%type <codigo> operadorAsignacion;
 %type <ins_sel> instruccionSeleccion;
 %type <ins_iter> instruccionIteracion;
 
@@ -58,7 +57,7 @@ sentencia   : declaracion
 
 declaracion : tipoSimple ID_ INSTREND_
                 {
-                    if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
+                    if (!insTdS(codigoOperador, $1, dvar, REF_TIPO_SIMPLE)) 
                     {
                         yyerror("Identificador repetido");
                     }
@@ -460,6 +459,8 @@ expresionUnaria : expresionSufija
                         $$.tipo = T_ERROR;
                         break;
                     }
+
+                    emiteOperadorIncremento($2.pos, $1);
                     $$.tipo = T_ENTERO;
                 }
                 ;
@@ -480,6 +481,8 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         $$.tipo = T_ERROR;
                         break;
                     }
+                    
+                    emiteOperadorIncremento($1.pos, $2);
                     $$.tipo = T_ENTERO;
                 }
 
@@ -605,8 +608,8 @@ operadorUnario     : MAS_ { $$ = 1; }
                    | NEG_ { $$ = 0; }
                    ;  
 
-operadorIncremento : INC_
-                   | DEC_
+operadorIncremento : INC_ { $$ = 0; }
+                   | DEC_ { $$ = 1; }
                    ;
 
 %%
@@ -622,31 +625,44 @@ int buscaPos(char* id)
     obtTdS(id).desp;
 }
 
+void emiteOperadorIncremento(char* id, int codigoOperador)
+{
+    switch (codigoOperador)
+    {
+        case 0:
+            emite(ESUM, crArgPos(buscaPos(id)), crArgEnt(1), crArgPos(buscaPos(id)));
+            break;
+        case 1:
+            emite(EDIF, crArgPos(buscaPos(id)), crArgEnt(1), crArgPos(buscaPos(id)));
+            break;
+    }
+}
+
 void emiteAsignacionConExpresion(char* id, int codigoOperador, int posicionExpresion)
 {
-    int tmp_pos = $3.pos;
-    switch ($2)
+    int tmp_pos = posicionExpresion;
+    switch (codigoOperador)
     {
         case 1:
             tmp_pos = creaVarTemp();
-            emite(ESUM, crArgPos(buscaPos($1)), crArgPos($3.pos), crArgPos(tmp_pos));
+            emite(ESUM, crArgPos(buscaPos(id)), crArgPos(posicionExpresion), crArgPos(tmp_pos));
             break;
 
         case 2:
             tmp_pos = creaVarTemp();
-            emite(EDIF, crArgPos(buscaPos($1)), crArgPos($3.pos), crArgPos(tmp_pos));
+            emite(EDIF, crArgPos(buscaPos(id)), crArgPos(posicionExpresion), crArgPos(tmp_pos));
             break;
 
         case 3:
             tmp_pos = creaVarTemp();
-            emite(EMULT, crArgPos(buscaPos($1)), crArgPos($3.pos), crArgPos(tmp_pos));
+            emite(EMULT, crArgPos(buscaPos(id)), crArgPos(posicionExpresion), crArgPos(tmp_pos));
             break;
 
         case 4:
             tmp_pos = creaVarTemp();
-            emite(EDIVI, crArgPos(buscaPos($1)), crArgPos($3.pos), crArgPos(tmp_pos));
+            emite(EDIVI, crArgPos(buscaPos(id)), crArgPos(posicionExpresion), crArgPos(tmp_pos));
             break;
         }
 
-        emite(EASIG, crArgPos(tmp_pos), crArgNul(), crArgPos(buscaPos($1)));
+        emite(EASIG, crArgPos(tmp_pos), crArgNul(), crArgPos(buscaPos(id)));
 }
