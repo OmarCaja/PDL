@@ -5,7 +5,7 @@
 /*****************************************************************************/
 #ifndef _HEADER_H
 #define _HEADER_H
-
+#include "libgci.h"
 /****************************************************** Constantes generales */
 #define TRUE  1
 #define FALSE 0
@@ -73,7 +73,7 @@ typedef struct
 void actualizarDesplazamiento(int talla);
 int buscaPos(char* id);
 void emiteAsignacionConExpresion(char* id, int codigoOperador, int posicionExpresion);
-void emiteOperadorIncremento(char* id, int codigotOperador);
+int emiteOperacionAritmetica(TIPO_ARG argumento1, TIPO_ARG argumento2, int operador);
 #endif  /* _HEADER_H */
 /*****************************************************************************/
 

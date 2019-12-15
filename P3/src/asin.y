@@ -259,7 +259,7 @@ expresion   : expresionLogica
                         break;
                     }                           
 
-                    emiteAsignacionConExpresion($1, $2, $3.pos);
+                    emiteAsignacionConExpresion(crArgPos(buscaPos($1)), $3.pos, $2);
 
                     $$.pos = buscaPos($1);
                     $$.tipo = T_ENTERO;
@@ -407,6 +407,7 @@ expresionAditiva : expresionMultiplicativa
                     
                     if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                     {
+                        $$.pos = emiteOperacionAritmetica(crArgPos($1.pos), crArgPos($3.pos), $2);
                         $$.tipo = $1.tipo;
                     }
                     else
@@ -422,19 +423,8 @@ expresionMultiplicativa : expresionUnaria
                         {
                             if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                             {
-                               $$.tipo = $1.tipo;
-                                switch ($2)
-                                {
-                                    case 0:
-                                        break;
-
-                                    case 1:
-                                        break;
-
-                                    case 2:
-                                        break;
-                                }
-
+                                $$.tipo = $1.tipo;
+                                $$.pos = emiteOperacionAritmetica(crArgPos($1.pos), crArgPos($3.pos), $2);
                             }
                             else
                             {
@@ -449,18 +439,7 @@ expresionUnaria : expresionSufija
                 { 
                     if (($2.tipo == T_ENTERO && $1 != 0))
                     {
-                        switch ($1)
-                        {
-                            case 1:
-                                $$.pos = $2.pos;
-                                break;
-                            case 2:
-                                pos = creaVarTemp();
-                                emite(EDIF, crArgEnt(0), crArgPos($2.pos), crArgPos(pos));
-                                $$.pos = pos;
-                                break;
-                        }
-
+                        $$.pos = emiteOperacionAritmetica(crArgEnt(0), crArgPos($2.pos), $1);
                         $$.tipo = $2.tipo;
                     }
                     else if (($2.tipo == T_LOGICO && $1 == 0))
@@ -489,8 +468,8 @@ expresionUnaria : expresionSufija
                         break;
                     }
 
-                    emiteOperadorIncremento($2.pos, $1);
-                    $$.pos = $2.pos;
+                    emiteAsignacionConExpresion(crArgPos(buscaPos($2)), crArgEnt(1), $1);
+                    $$.pos = buscaPos($2);
                     $$.tipo = T_ENTERO;
                 }
                 ;
@@ -512,8 +491,8 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         break;
                     }
                     
-                    emiteOperadorIncremento($1.pos, $2);
-                    $$.pos = $1.pos;
+                    emiteAsignacionConExpresion(crArgPos(buscaPos($1)), crArgEnt(1), $2);
+                    $$.pos = buscaPos($1);
                     $$.tipo = T_ENTERO;
                 }
 
@@ -605,11 +584,11 @@ constante : CTE_
             ;  
 
 
-operadorAsignacion  : ASIG_ { $$ = 0; }
-                    | MASASIG_ { $$ = 1; }
-                    | MENOSASIG_ { $$ = 2; }
-                    | PORASIG_ { $$ = 3; }
-                    | DIVASIG_ { $$ = 4; }
+operadorAsignacion  : ASIG_ { $$ = EASIG; }
+                    | MASASIG_ { $$ = ESUM; }
+                    | MENOSASIG_ { $$ = EDIF; }
+                    | PORASIG_ { $$ = EMULT; }
+                    | DIVASIG_ { $$ = EDIVI; }
                     ; 
 
 operadorLogico : AND_
@@ -626,22 +605,22 @@ operadorRelacional : MAYOR_
                    | MENORIGUAL_
                    ; 
 
-operadorAditivo : MAS_ { $$ = 0; }
-                | MENOS_ { $$ = 1; }
+operadorAditivo : MAS_ { $$ = ESUM; }
+                | MENOS_ { $$ = EDIF; }
                 ;
 
-operadorMultiplicativo : POR_ { $$ = 0; }
-                       | DIV_ { $$ = 1; }
-                       | MOD_ { $$ = 2; }
+operadorMultiplicativo : POR_ { $$ = EMULT; }
+                       | DIV_ { $$ = EDIVI; }
+                       | MOD_ { $$ = RESTO; }
                        ;  
 
-operadorUnario     : MAS_ { $$ = 1; }
-                   | MENOS_ { $$ = 2; }
+operadorUnario     : MAS_ { $$ = ESUM; }
+                   | MENOS_ { $$ = EDIF; }
                    | NEG_ { $$ = 0; }
                    ;  
 
-operadorIncremento : INC_ { $$ = 0; }
-                   | DEC_ { $$ = 1; }
+operadorIncremento : INC_ { $$ = ESUM; }
+                   | DEC_ { $$ = EDIF; }
                    ;
 
 %%
@@ -657,44 +636,21 @@ int buscaPos(char* id)
     obtTdS(id).desp;
 }
 
-void emiteOperadorIncremento(char* id, int codigoOperador)
+int emiteOperacionAritmetica(TIPO_ARG argumento1, TIPO_ARG argumento2, int operador)
 {
-    switch (codigoOperador)
-    {
-        case 0:
-            emite(ESUM, crArgPos(buscaPos(id)), crArgEnt(1), crArgPos(buscaPos(id)));
-            break;
-        case 1:
-            emite(EDIF, crArgPos(buscaPos(id)), crArgEnt(1), crArgPos(buscaPos(id)));
-            break;
-    }
+    tmp_pos = creaVarTemp();
+    emite(operador, argumento1, argumento2, tmp_pos);
+    return tmp_pos;
 }
 
-void emiteAsignacionConExpresion(char* id, int codigoOperador, int posicionExpresion)
+void emiteAsignacionConExpresion(TIPO_ARG argumento1, TIPO_ARG argumento2, int operador)
 {
     int tmp_pos = posicionExpresion;
-    switch (codigoOperador)
+    
+    if (operador != EASIG)
     {
-        case 1:
-            tmp_pos = creaVarTemp();
-            emite(ESUM, crArgPos(buscaPos(id)), crArgPos(posicionExpresion), crArgPos(tmp_pos));
-            break;
-
-        case 2:
-            tmp_pos = creaVarTemp();
-            emite(EDIF, crArgPos(buscaPos(id)), crArgPos(posicionExpresion), crArgPos(tmp_pos));
-            break;
-
-        case 3:
-            tmp_pos = creaVarTemp();
-            emite(EMULT, crArgPos(buscaPos(id)), crArgPos(posicionExpresion), crArgPos(tmp_pos));
-            break;
-
-        case 4:
-            tmp_pos = creaVarTemp();
-            emite(EDIVI, crArgPos(buscaPos(id)), crArgPos(posicionExpresion), crArgPos(tmp_pos));
-            break;
-        }
-
-        emite(EASIG, crArgPos(tmp_pos), crArgNul(), crArgPos(buscaPos(id)));
+        tmp_pos = emiteOperacionAritmetica(argumento1, argumento2, operador);
+    }
+    
+    emite(EASIG, crArgPos(tmp_pos), crArgNul(), argumento1));
 }
