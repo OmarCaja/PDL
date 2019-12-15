@@ -261,6 +261,7 @@ expresion   : expresionLogica
 
                     emiteAsignacionConExpresion($1, $2, $3.pos);
 
+                    $$.pos = buscaPos($1);
                     $$.tipo = T_ENTERO;
                 }
             | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
@@ -422,6 +423,18 @@ expresionMultiplicativa : expresionUnaria
                             if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                             {
                                $$.tipo = $1.tipo;
+                                switch ($2)
+                                {
+                                    case 0:
+                                        break;
+
+                                    case 1:
+                                        break;
+
+                                    case 2:
+                                        break;
+                                }
+
                             }
                             else
                             {
@@ -434,9 +447,24 @@ expresionMultiplicativa : expresionUnaria
 expresionUnaria : expresionSufija
                 | operadorUnario expresionUnaria 
                 { 
-                    if (($2.tipo == T_ENTERO && $1 != 0) || ($2.tipo == T_LOGICO && $1 == 0))
+                    if (($2.tipo == T_ENTERO && $1 != 0))
                     {
                         switch ($1)
+                        {
+                            case 1:
+                                $$.pos = $2.pos;
+                                break;
+                            case 2:
+                                pos = creaVarTemp();
+                                emite(EDIF, crArgEnt(0), crArgPos($2.pos), crArgPos(pos));
+                                $$.pos = pos;
+                                break;
+                        }
+
+                        $$.tipo = $2.tipo;
+                    }
+                    else if (($2.tipo == T_LOGICO && $1 == 0))
+                    {
                         $$.tipo = $2.tipo;
                     }
                     else
@@ -462,6 +490,7 @@ expresionUnaria : expresionSufija
                     }
 
                     emiteOperadorIncremento($2.pos, $1);
+                    $$.pos = $2.pos;
                     $$.tipo = T_ENTERO;
                 }
                 ;
@@ -484,6 +513,7 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     }
                     
                     emiteOperadorIncremento($1.pos, $2);
+                    $$.pos = $1.pos;
                     $$.tipo = T_ENTERO;
                 }
 
@@ -596,13 +626,13 @@ operadorRelacional : MAYOR_
                    | MENORIGUAL_
                    ; 
 
-operadorAditivo : MAS_
-                | MENOS_
+operadorAditivo : MAS_ { $$ = 0; }
+                | MENOS_ { $$ = 1; }
                 ;
 
-operadorMultiplicativo : POR_
-                       | DIV_
-                       | MOD_
+operadorMultiplicativo : POR_ { $$ = 0; }
+                       | DIV_ { $$ = 1; }
+                       | MOD_ { $$ = 2; }
                        ;  
 
 operadorUnario     : MAS_ { $$ = 1; }
