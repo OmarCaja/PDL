@@ -30,17 +30,14 @@
 %type <codigo> operadorUnario operadorIncremento operadorAsignacion;
 %type <codigo> operadorAditivo operadorMultiplicativo;
 %type <listaCampos> listaCampos;
-%type <ins_sel> instruccionSeleccion;
-%type <ins_iter> instruccionIteracion;
 
 
 %union {
     t_tmp_var tmp_var; // Preparado con la posicion para la generacion de CI
     int codigo;
+    int etiqueta;
     char *nombre;
     t_listaCampos listaCampos;
-    t_ins_sel ins_sel;
-    t_ins_iter ins_iter;
 }
 
 %%
@@ -175,7 +172,7 @@ instruccionEntradaSalida    : LEER_ OPAR_ ID_ CPAR_ INSTREND_
                                 {
                                     yyerror("El argumento del \"read\" debe ser \"entero\"");
                                 }
-                                emite(EREAD,crArgNul(),crArgNul(),crArgPos(simb.ref));
+                                emite(EREAD,crArgNul(),crArgNul(),crArgPos(simb.desp));
                             }
                             | IMPRIMIR_ OPAR_ expresion CPAR_ INSTREND_
                             {
@@ -194,42 +191,41 @@ instruccionSeleccion    : SI_ OPAR_ expresion CPAR_
                                 yyerror("La expresion de if debe ser logica");
                             }
 
-                            $$.falso = creaLans(si);
-                            emite(EIGUAL,crArgPos($3.posicion),crArgEnt (0),---);
+                            $<etiqueta>$ = creaLans(si);
+                            emite(EIGUAL,crArgPos($3.posicion),crArgEnt (0),crArgNul());
                         }
                         instruccion
                         {
-                            $$.fin = creaLans(si);
-                            emite(GOTOS,crArgNul(),crArgNul(),----);
-                            completaLans($$.falso,si);
+                            $<etiqueta>$= creaLans(si);
+                            emite(GOTOS,crArgNul(),crArgNul(),crArgNul());
+                            completaLans($<etiqueta>5,crArgEtq(si));
 
                         }
                         
                          SINO_ instruccion
                          {
-                            completaLans($$.fin,si);
+                            completaLans($<etiqueta>7,crArgEtq(si));
                          }
                         ;
 
 instruccionIteracion    : MIENTRAS_
                         {
-                            $$.ini = creaLans(si);
-
+                            $<etiqueta>$ = si;
                         }
                         
                          OPAR_ expresion CPAR_
                         {
-                            if ($3.tipo != T_ERROR && $3.tipo != T_LOGICO)
+                            if ($4.tipo != T_ERROR && $4.tipo != T_LOGICO)
                             {
                                 yyerror("La expresion de while debe ser logica");
                             }
-                            $$.fin = creaLans(si);
-                            emite(EIGUAL,crArgPos($4.posicion),crArgEnt(0),---);
+                            $<etiqueta>$ = creaLans(si);
+                            emite(EIGUAL,crArgPos($4.posicion),crArgEnt(0),crArgNul());
                         }
                         instruccion
                         {
-                            emite(GOTOS,crArgNul,crArgNul,$$.ini);
-                            completaLans($$.fin,si);
+                            emite(GOTOS,crArgNul(),crArgNul(),crArgEtq($<etiqueta>2));
+                            completaLans($<etiqueta>6,crArgEtq(si));
                         }
                         ;
 

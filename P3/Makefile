@@ -7,7 +7,7 @@ SRCDIR = src
 INCDIR = include
 LIBDIR = lib
 # Opciones de compilacion
-COPT = -Wall -g  -no-pie -DYYDEBUG=1
+COPT = -Wall -g -DYYDEBUG=1
 CLIB = -lfl -ltds -lgci
 OBJS = ./alex.o  ./asin.o ./main.o 
 YACCFLAGS = --debug --verbose
