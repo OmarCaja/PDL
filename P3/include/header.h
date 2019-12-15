@@ -68,9 +68,11 @@ typedef struct
 {
     int ini;
     int fin;
-}t_ins_iter
+}t_ins_iter;
 
 void actualizarDesplazamiento(int talla);
+int buscaPos(char* id);
+void emiteAsignacionConExpresion(char* id, int codigoOperador, int posicionExpresion);
 #endif  /* _HEADER_H */
 /*****************************************************************************/
 

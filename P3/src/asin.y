@@ -258,8 +258,10 @@ expresion   : expresionLogica
                         yyerror("Error de tipos en la \"asignacion\"");
                         $$.tipo = T_ERROR;
                         break;
-                    }
-                    emitirAsignacion(buscaPos($1), $2, $3.pos);
+                    }                           
+
+                    emiteAsignacionConExpresion($1, $2, $3.pos);
+
                     $$.tipo = T_ENTERO;
                 }
             | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
@@ -606,6 +608,7 @@ operadorUnario     : MAS_ { $$ = 1; }
 operadorIncremento : INC_
                    | DEC_
                    ;
+
 %%
 
 
@@ -619,14 +622,31 @@ int buscaPos(char* id)
     obtTdS(id).desp;
 }
 
-void emitirAsignacion(int idPos, int asigCode, int expPos)
+void emiteAsignacionConExpresion(char* id, int codigoOperador, int posicionExpresion)
 {
-    if (asigCode == 0)
+    int tmp_pos = $3.pos;
+    switch ($2)
     {
-        emite(EASIG, crAgrPos(idPos), )
-    }
-    else
-    {
+        case 1:
+            tmp_pos = creaVarTemp();
+            emite(ESUM, crArgPos(buscaPos($1)), crArgPos($3.pos), crArgPos(tmp_pos));
+            break;
 
-    }
+        case 2:
+            tmp_pos = creaVarTemp();
+            emite(EDIF, crArgPos(buscaPos($1)), crArgPos($3.pos), crArgPos(tmp_pos));
+            break;
+
+        case 3:
+            tmp_pos = creaVarTemp();
+            emite(EMULT, crArgPos(buscaPos($1)), crArgPos($3.pos), crArgPos(tmp_pos));
+            break;
+
+        case 4:
+            tmp_pos = creaVarTemp();
+            emite(EDIVI, crArgPos(buscaPos($1)), crArgPos($3.pos), crArgPos(tmp_pos));
+            break;
+        }
+
+        emite(EASIG, crArgPos(tmp_pos), crArgNul(), crArgPos(buscaPos($1)));
 }
