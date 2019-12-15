@@ -567,6 +567,8 @@ constante : CTE_
             {
                 $$.tipo = T_ENTERO;
                 $$.valor = $1;
+                $$.posicion = creaVarTemp();
+                emite(EASIG, crArgEnt($1), crArgNul(), crArgPos($$.posicion))
             }
           | VERDADERO_ 
             {
