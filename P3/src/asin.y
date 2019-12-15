@@ -55,7 +55,7 @@ sentencia   : declaracion
 
 declaracion : tipoSimple ID_ INSTREND_
                 {
-                    if (!insTdS(codigoOperador, $1, dvar, REF_TIPO_SIMPLE)) 
+                    if (!insTdS($2, $1, dvar, REF_TIPO_SIMPLE)) 
                     {
                         yyerror("Identificador repetido");
                     }
@@ -256,9 +256,9 @@ expresion   : expresionLogica
                         break;
                     }                           
 
-                    emiteAsignacionConExpresion(crArgPos(buscaPos($1)), $3.pos, $2);
+                    emiteAsignacionConExpresion(crArgPos(buscaPos($1)), crArgPos($3.posicion), $2);
 
-                    $$.pos = buscaPos($1);
+                    $$.posicion = buscaPos($1);
                     $$.tipo = T_ENTERO;
                 }
             | ID_ OBRA_ expresion CBRA_ operadorAsignacion expresion
@@ -404,7 +404,7 @@ expresionAditiva : expresionMultiplicativa
                     
                     if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                     {
-                        $$.pos = emiteOperacionAritmetica(crArgPos($1.pos), crArgPos($3.pos), $2);
+                        $$.posicion = emiteOperacionAritmetica(crArgPos($1.posicion), crArgPos($3.posicion), $2);
                         $$.tipo = $1.tipo;
                     }
                     else
@@ -421,7 +421,7 @@ expresionMultiplicativa : expresionUnaria
                             if ($1.tipo == $3.tipo && $1.tipo == T_ENTERO)
                             {
                                 $$.tipo = $1.tipo;
-                                $$.pos = emiteOperacionAritmetica(crArgPos($1.pos), crArgPos($3.pos), $2);
+                                $$.posicion = emiteOperacionAritmetica(crArgPos($1.posicion), crArgPos($3.posicion), $2);
                             }
                             else
                             {
@@ -436,7 +436,7 @@ expresionUnaria : expresionSufija
                 { 
                     if (($2.tipo == T_ENTERO && $1 != 0))
                     {
-                        $$.pos = emiteOperacionAritmetica(crArgEnt(0), crArgPos($2.pos), $1);
+                        $$.posicion = emiteOperacionAritmetica(crArgEnt(0), crArgPos($2.posicion), $1);
                         $$.tipo = $2.tipo;
                     }
                     else if (($2.tipo == T_LOGICO && $1 == 0))
@@ -466,7 +466,7 @@ expresionUnaria : expresionSufija
                     }
 
                     emiteAsignacionConExpresion(crArgPos(buscaPos($2)), crArgEnt(1), $1);
-                    $$.pos = buscaPos($2);
+                    $$.posicion = buscaPos($2);
                     $$.tipo = T_ENTERO;
                 }
                 ;
@@ -489,7 +489,7 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     }
                     
                     emiteAsignacionConExpresion(crArgPos(buscaPos($1)), crArgEnt(1), $2);
-                    $$.pos = buscaPos($1);
+                    $$.posicion = buscaPos($1);
                     $$.tipo = T_ENTERO;
                 }
 
@@ -535,7 +535,7 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                     }
 
                     $$.tipo = simb.tipo;
-                    $$.pos = simb.desp;
+                    $$.posicion = simb.desp;
                 }
                 | ID_ SEP_ ID_
                 {
@@ -630,24 +630,24 @@ void actualizarDesplazamiento(int talla)
 
 int buscaPos(char* id)
 {
-    obtTdS(id).desp;
+    return obtTdS(id).desp;
 }
 
 int emiteOperacionAritmetica(TIPO_ARG argumento1, TIPO_ARG argumento2, int operador)
 {
-    tmp_pos = creaVarTemp();
-    emite(operador, argumento1, argumento2, tmp_pos);
+    int tmp_pos = creaVarTemp();
+    emite(operador, argumento1, argumento2, crArgPos(tmp_pos));
     return tmp_pos;
 }
 
 void emiteAsignacionConExpresion(TIPO_ARG argumento1, TIPO_ARG argumento2, int operador)
 {
-    int tmp_pos = posicionExpresion;
+    int tmp_pos = argumento2.val;
     
     if (operador != EASIG)
     {
         tmp_pos = emiteOperacionAritmetica(argumento1, argumento2, operador);
     }
     
-    emite(EASIG, crArgPos(tmp_pos), crArgNul(), argumento1));
+    emite(EASIG, crArgPos(tmp_pos), crArgNul(), argumento1);
 }

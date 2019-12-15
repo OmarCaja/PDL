@@ -73,7 +73,7 @@ typedef struct
 */
 void actualizarDesplazamiento(int talla);
 int buscaPos(char* id);
-void emiteAsignacionConExpresion(char* id, int codigoOperador, int posicionExpresion);
+void emiteAsignacionConExpresion(TIPO_ARG argumento1, TIPO_ARG argumento2, int operador);
 int emiteOperacionAritmetica(TIPO_ARG argumento1, TIPO_ARG argumento2, int operador);
 #endif  /* _HEADER_H */
 /*****************************************************************************/
