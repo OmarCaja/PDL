@@ -28,6 +28,7 @@
 %type <tmp_var> expresionUnaria expresionSufija
 %type <tmp_var> constante
 %type <codigo> operadorUnario operadorIncremento operadorAsignacion;
+%type <codigo> operadorAditivo operadorMultiplicativo;
 %type <listaCampos> listaCampos;
 %type <ins_sel> instruccionSeleccion;
 %type <ins_iter> instruccionIteracion;
