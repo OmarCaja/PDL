@@ -1,0 +1,13 @@
+#!/bin/bash
+    echo ""
+    echo "### ${1} ###";
+    echo "*** Coments and debug info ***";
+    echo ""
+	grep // ${1}
+    echo ""
+	echo "*** Compiling: ${1} ***" ;
+	./menoscc -f $file ${1};
+    echo ""
+    echo "*** Running mvm ***";
+    echo ""
+	./bin/mvm foobar.c3d
