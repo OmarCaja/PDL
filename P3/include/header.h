@@ -15,6 +15,9 @@ enum{
     EX_SETONLESS,
     EX_SETONEQUGREAT,
     EX_SETONEQULESS,
+    EX_AND,
+    EX_OR,
+    EX_NOT,
 };
 
 /****************************************************** Constantes generales */
