@@ -548,6 +548,10 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         $$.tipo = T_ERROR;
                         break;
                     }
+
+                    $$.posicion = creaVarTemp();
+                    emite(EMULT, crArgPos($3.posicion), crArgEnt(TALLA_TIPO_SIMPLE), crArgPos($$.posicion));
+                    emite(ESUM, crArgEnt(simb.desp), crArgPos($$.posicion), crArgPos($$.posicion));
                     $$.tipo = dim.telem;
 
                 }
