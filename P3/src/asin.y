@@ -200,7 +200,6 @@ instruccionSeleccion    : SI_ OPAR_ expresion CPAR_
                             $<etiqueta>$= creaLans(si);
                             emite(GOTOS,crArgNul(),crArgNul(),crArgNul());
                             completaLans($<etiqueta>5,crArgEtq(si));
-
                         }
                         
                          SINO_ instruccion
@@ -327,7 +326,8 @@ expresion   : expresionLogica
                         break;
                     }   
 
-                    $$.tipo =  obtTdR(simb.ref,$3).tipo;
+                    CAMP camp = obtTdR(simb.ref,$3);
+                    $$.tipo =  camp.tipo;
                     if ($$.tipo == T_ERROR){
                         yyerror("Campo no declarado");
                         break;
@@ -340,6 +340,8 @@ expresion   : expresionLogica
                         break;
                     }
                     $$.tipo = T_ENTERO;
+
+                    emite(EASIG,crArgPos($5.posicion),crArgNul(),crArgPos(camp.desp+simb.desp));
                 }
             ;  
 
@@ -591,11 +593,13 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         break;
                     }    
 
-                    $$.tipo =  obtTdR(simb.ref,$3).tipo;
+                    CAMP camp = obtTdR(simb.ref,$3);
+                    $$.tipo =  camp.tipo;
                     if ($$.tipo == T_ERROR){
                         yyerror("Campo no declarado");
                         break;
                     } 
+                    $$.posicion = camp.desp + simb.desp;
 
                 }
                 | constante
