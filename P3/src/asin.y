@@ -487,9 +487,11 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         $$.tipo = T_ERROR;
                         break;
                     }
-                    
+                    $$.posicion = creaVarTemp();
+                    emite(EASIG, crArgPos(buscaPos($1)), crArgNul(), crArgPos($$.posicion));
+
                     emiteAsignacionConExpresion(crArgPos(buscaPos($1)), crArgEnt(1), $2);
-                    $$.posicion = buscaPos($1);
+                    
                     $$.tipo = T_ENTERO;
                 }
 
