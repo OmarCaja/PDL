@@ -29,6 +29,7 @@
 %type <tmp_var> constante
 %type <codigo> operadorUnario operadorIncremento operadorAsignacion;
 %type <codigo> operadorAditivo operadorMultiplicativo operadorIgualdad;
+%type <codigo> operadorRelacional;
 %type <listaCampos> listaCampos;
 
 
@@ -379,7 +380,7 @@ expresionIgualdad : expresionRelacional
                     TIPO_ARG argB = crArgPos($3.posicion);
                     TIPO_ARG argDest = crArgPos($$.posicion);
                     /*Diferencia*/
-                    emite(EDIF, argA , argB, crArgPos($$.posicion));
+                    emite(EDIF, argA , argB, argDest);
                     /*Normalizar a 1*/
                     emite(EIGUAL,argDest,crArgEnt(0),crArgEtq(si+2));
                     emite(EASIG ,crArgEnt(1), crArgNul() ,argDest);
@@ -404,6 +405,24 @@ expresionRelacional : expresionAditiva
                         $$.tipo = T_ERROR;
                     }
                     /**/
+                    $$.posicion = creaVarTemp();
+                    TIPO_ARG argA = crArgPos($1.posicion);
+                    TIPO_ARG argB = crArgPos($3.posicion);
+                    TIPO_ARG argDest = crArgPos($$.posicion);
+                    /**/
+                    int c3dop = GOTOS; //valor por defecto
+                    switch($2)
+                    {
+                        case EX_SETONGREATER: c3dop = EMAY; break;
+                        case EX_SETONLESS: c3dop = EMEN ; break;
+                        case EX_SETONEQUGREAT: c3dop = EMAYEQ; break;
+                        case EX_SETONEQULESS: c3dop = EMENEQ; break;
+                    }
+                    /**/
+                    emite(c3dop,argA,argB,crArgEtq(si+3));
+                    emite(EASIG,crArgEnt(0),crArgNul(),argDest);
+                    emite(GOTOS,crArgNul(),crArgNul(),crArgEtq(si+2));
+                    emite(EASIG,crArgEnt(1),crArgNul(),argDest);
                  }
                     ;
 
@@ -612,10 +631,10 @@ operadorIgualdad : IGUAL_ { $$ = EX_SETONEQU; }
                  | DIFERENTE_ { $$ = EX_SETONDIFF; }
                  ;   
 
-operadorRelacional : MAYOR_
-                   | MENOR_
-                   | MAYORIGUAL_
-                   | MENORIGUAL_
+operadorRelacional : MAYOR_ { $$ = EX_SETONGREATER; }
+                   | MENOR_ { $$ = EX_SETONLESS; }
+                   | MAYORIGUAL_ { $$ = EX_SETONEQUGREAT; }
+                   | MENORIGUAL_ { $$ = EX_SETONEQULESS; }
                    ; 
 
 operadorAditivo : MAS_ { $$ = ESUM; }
