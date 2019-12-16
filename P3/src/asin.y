@@ -337,7 +337,7 @@ expresion   : expresionLogica
                     }
                     $$.tipo = T_ENTERO;
 
-                    emite(EASIG,crArgPos($5.posicion),crArgNul(),crArgPos(camp.desp));
+                    emite(EASIG,crArgPos($5.posicion),crArgNul(),crArgPos(camp.desp+simb.desp));
                 }
             ;  
 
@@ -563,7 +563,7 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         yyerror("Campo no declarado");
                         break;
                     } 
-                    $$.posicion = camp.desp;
+                    $$.posicion = camp.desp + simb.desp;
 
                 }
                 | constante
