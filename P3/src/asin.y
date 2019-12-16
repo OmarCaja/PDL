@@ -29,7 +29,7 @@
 %type <tmp_var> constante
 %type <codigo> operadorUnario operadorIncremento operadorAsignacion;
 %type <codigo> operadorAditivo operadorMultiplicativo operadorIgualdad;
-%type <codigo> operadorRelacional;
+%type <codigo> operadorRelacional operadorLogico;
 %type <listaCampos> listaCampos;
 
 
@@ -357,6 +357,19 @@ expresionLogica : expresionIgualdad
                         yyerror("Error de tipos en \"expresion logica\"");
                         $$.tipo = T_ERROR;
                     }
+                    /**/
+                    $$.posicion = creaVarTemp();
+                    TIPO_ARG argA = crArgPos($1.posicion);
+                    TIPO_ARG argB = crArgPos($3.posicion);
+                    TIPO_ARG argDest = crArgPos($$.posicion);
+                    /*Diferencia*/
+                    int c3dop = EX_AND;
+                    if(c3dop == EX_AND) c3dop = EMULT;
+                    if(c3dop == EX_OR) c3dop = ESUM;
+                    emite(c3dop, argA , argB, argDest);
+                    /*Normalizar a 1*/
+                    emite(EIGUAL,argDest,crArgEnt(0),crArgEtq(si+2));
+                    emite(EASIG ,crArgEnt(1), crArgNul() ,argDest);
                  }
                 ;
 
@@ -465,13 +478,21 @@ expresionMultiplicativa : expresionUnaria
 expresionUnaria : expresionSufija
                 | operadorUnario expresionUnaria 
                 { 
-                    if (($2.tipo == T_ENTERO && $1 != 0))
+                    if (($2.tipo == T_ENTERO && $1 != EX_NOT))
                     {
                         $$.posicion = emiteOperacionAritmetica(crArgEnt(0), crArgPos($2.posicion), $1);
                         $$.tipo = $2.tipo;
                     }
-                    else if (($2.tipo == T_LOGICO && $1 == 0))
+                    else if (($2.tipo == T_LOGICO && $1 == EX_NOT))
                     {
+                        $$.posicion = creaVarTemp();
+                        TIPO_ARG argDest = crArgPos($$.posicion);
+                        TIPO_ARG argA = crArgPos($2.posicion);
+                        emite(EIGUAL,argA,crArgEnt(0),crArgEtq(si+3));
+                        emite(EASIG,crArgEnt(0),crArgNul(),argDest);
+                        emite(GOTOS,crArgNul(),crArgNul(),crArgEtq(si+2));
+                        emite(EASIG,crArgEnt(1),crArgNul(),argDest);
+                        /**/
                         $$.tipo = $2.tipo;
                     }
                     else
@@ -623,8 +644,8 @@ operadorAsignacion  : ASIG_ { $$ = EASIG; }
                     | DIVASIG_ { $$ = EDIVI; }
                     ; 
 
-operadorLogico : AND_
-               | OR_
+operadorLogico : AND_ { $$ = EX_AND; }
+               | OR_  { $$ = EX_OR ; }
                ; 
 
 operadorIgualdad : IGUAL_ { $$ = EX_SETONEQU; }
@@ -648,7 +669,7 @@ operadorMultiplicativo : POR_ { $$ = EMULT; }
 
 operadorUnario     : MAS_ { $$ = ESUM; }
                    | MENOS_ { $$ = EDIF; }
-                   | NEG_ { $$ = 0; }
+                   | NEG_ { $$ = EX_NOT; }
                    ;  
 
 operadorIncremento : INC_ { $$ = ESUM; }
