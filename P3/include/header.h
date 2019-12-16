@@ -49,7 +49,6 @@ typedef struct
 {
     int tipo;
     int posicion;
-    int valor;
 }t_tmp_var;
 
 typedef struct

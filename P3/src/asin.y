@@ -83,7 +83,7 @@ declaracion : tipoSimple ID_ INSTREND_
                     else
                     {
                         SIMB _simb = obtTdS($2);
-                        emite (EASIG, crArgEnt($4.valor) , crArgNul(), crArgPos(_simb.desp));
+                        emite (EASIG, crArgPos($4.posicion) , crArgNul(), crArgPos(_simb.desp));
                     }
                 }
             | tipoSimple ID_ OBRA_ CTE_ CBRA_ INSTREND_
@@ -568,19 +568,20 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
 constante : CTE_
             {
                 $$.tipo = T_ENTERO;
-                $$.valor = $1;
                 $$.posicion = creaVarTemp();
                 emite(EASIG, crArgEnt($1), crArgNul(), crArgPos($$.posicion));
             }
           | VERDADERO_ 
             {
                 $$.tipo = T_LOGICO;
-                $$.valor = 1;
+                $$.posicion = creaVarTemp();
+                emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.posicion));
             }
           | FALSO_ 
             {
                 $$.tipo = T_LOGICO;
-                $$.valor = 0;
+                $$.posicion = creaVarTemp();
+                emite(EASIG, crArgEnt(0), crArgNul(), crArgPos($$.posicion));
             }
             ;  
 
