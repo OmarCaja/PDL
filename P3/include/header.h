@@ -6,6 +6,13 @@
 #ifndef _HEADER_H
 #define _HEADER_H
 #include "libgci.h"
+/****** extension ISA******/
+enum{
+    EX_NOP = FIN,
+    EX_SETONEQU,   //Set on equal, res = 1 si op1 == op2
+    EX_SETONDIFF,  //Set on different, res = 1 si op1<>op2
+};
+
 /****************************************************** Constantes generales */
 #define TRUE  1
 #define FALSE 0
@@ -13,6 +20,7 @@
 #define REF_TIPO_SIMPLE -1
 #define NUEVA_ESTRUCTURA -1
 #define TDR_ERROR_CAMPO_EXISTENTE -1
+
 /************************************* Variables externas definidas en el AL */
 extern int yylex();
 extern int yyparse();

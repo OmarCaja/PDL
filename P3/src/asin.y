@@ -28,7 +28,7 @@
 %type <tmp_var> expresionUnaria expresionSufija
 %type <tmp_var> constante
 %type <codigo> operadorUnario operadorIncremento operadorAsignacion;
-%type <codigo> operadorAditivo operadorMultiplicativo;
+%type <codigo> operadorAditivo operadorMultiplicativo operadorIgualdad;
 %type <listaCampos> listaCampos;
 
 
@@ -374,6 +374,18 @@ expresionIgualdad : expresionRelacional
                         $$.tipo = T_ERROR;
                     }
                     /**/
+                    $$.posicion = creaVarTemp();
+                    TIPO_ARG argA = crArgPos($1.posicion);
+                    TIPO_ARG argB = crArgPos($3.posicion);
+                    TIPO_ARG argDest = crArgPos($$.posicion);
+                    /*Diferencia*/
+                    emite(EDIF, argA , argB, crArgPos($$.posicion));
+                    /*Normalizar a 1*/
+                    emite(EIGUAL,argDest,crArgEnt(0),crArgEtq(si+2));
+                    emite(EASIG ,crArgEnt(1), crArgNul() ,argDest);
+                    /*dest = 1 si argA == argB*/
+                    if( $2 == EX_SETONEQU)
+                    { emite(EDIF ,crArgEnt(1), argDest ,argDest); }
                    }
                   ;  
 
@@ -596,8 +608,8 @@ operadorLogico : AND_
                | OR_
                ; 
 
-operadorIgualdad : IGUAL_
-                 | DIFERENTE_
+operadorIgualdad : IGUAL_ { $$ = EX_SETONEQU; }
+                 | DIFERENTE_ { $$ = EX_SETONDIFF; }
                  ;   
 
 operadorRelacional : MAYOR_
