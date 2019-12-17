@@ -89,7 +89,6 @@ void actualizarDesplazamiento(int talla);
 int buscaPos(char* id);
 void emiteAsignacionConExpresion(TIPO_ARG argumento1, TIPO_ARG argumento2, int operador);
 int emiteOperacionAritmetica(TIPO_ARG argumento1, TIPO_ARG argumento2, int operador);
-int obtenerPosicionArray(int posicionInicioArray, int posicionExpresion);
 #endif  /* _HEADER_H */
 /*****************************************************************************/
 

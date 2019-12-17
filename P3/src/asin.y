@@ -299,8 +299,9 @@ expresion   : expresionLogica
                         break;
                     }
 
-                    $$.posicion = obtenerPosicionArray(simb.desp, $3.posicion);
+                    $$.posicion = creaVarTemp();
                     emiteAsignacionConExpresion(crArgPos($$.posicion), crArgPos($6.posicion), $5);
+                    emite(EVA, crArgPos(buscaPos($1)), crArgPos($3.posicion), crArgPos($$.posicion));
                     $$.tipo = T_ENTERO;
 
                 }
@@ -574,8 +575,8 @@ expresionSufija : OPAR_ expresion CPAR_ { $$ = $2; }
                         $$.tipo = T_ERROR;
                         break;
                     }
-
-                    $$.posicion = obtenerPosicionArray(simb.desp, $3.posicion);
+                    $$.posicion = creaVarTemp();
+                    emite(EAV, crArgPos(buscaPos($1)), crArgPos($3.posicion), crArgPos($$.posicion));
                     $$.tipo = dim.telem;
 
                 }
@@ -716,12 +717,4 @@ void emiteAsignacionConExpresion(TIPO_ARG argumento1, TIPO_ARG argumento2, int o
     }
     
     emite(EASIG, crArgPos(tmp_pos), crArgNul(), argumento1);
-}
-
-int obtenerPosicionArray(int posicionInicioArray, int posicionExpresion)
-{
-    int tmp_pos = creaVarTemp();
-    emite(EMULT, crArgPos(posicionExpresion), crArgEnt(TALLA_TIPO_SIMPLE), crArgPos(tmp_pos));
-    emite(ESUM, crArgEnt(posicionInicioArray), crArgPos(tmp_pos), crArgPos(tmp_pos));
-    return tmp_pos;
 }
