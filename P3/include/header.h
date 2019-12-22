@@ -8,13 +8,6 @@
 #include "libgci.h"
 /****** extension ISA******/
 enum{
-    EX_NOP = FIN,
-    EX_SETONEQU,   //Set on equal, res = 1 si op1 == op2
-    EX_SETONDIFF,  //Set on different, res = 1 si op1<>op2
-    EX_SETONGREATER,
-    EX_SETONLESS,
-    EX_SETONEQUGREAT,
-    EX_SETONEQULESS,
     EX_AND,
     EX_OR,
     EX_NOT,

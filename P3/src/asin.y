@@ -365,17 +365,17 @@ expresionLogica : expresionIgualdad
                     }
                     /**/
                     $$.posicion = creaVarTemp();
-                    TIPO_ARG argA = crArgPos($1.posicion);
-                    TIPO_ARG argB = crArgPos($3.posicion);
-                    TIPO_ARG argDest = crArgPos($$.posicion);
-                    /*Diferencia*/
-                    int c3dop = EX_AND;
-                    if(c3dop == EX_AND) c3dop = EMULT;
-                    if(c3dop == EX_OR) c3dop = ESUM;
-                    emite(c3dop, argA , argB, argDest);
-                    /*Normalizar a 1*/
-                    emite(EIGUAL,argDest,crArgEnt(0),crArgEtq(si+2));
-                    emite(EASIG ,crArgEnt(1), crArgNul() ,argDest);
+
+                    if($2 == EX_AND)
+                    {
+                        emite(EMULT, crArgPos($1.posicion), crArgPos($3.posicion), crArgPos($$.posicion));
+                    } 
+                    if($2 == EX_OR)
+                    {
+                        emite(ESUM, crArgPos($1.posicion), crArgPos($3.posicion), crArgPos($$.posicion));
+                        emite(EMENEQ, crArgPos($$.posicion), crArgEnt(1), crArgEtq(si+2));
+                        emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.posicion))
+                    }
                  }
                 ;
 
@@ -395,17 +395,10 @@ expresionIgualdad : expresionRelacional
                     }
                     /**/
                     $$.posicion = creaVarTemp();
-                    TIPO_ARG argA = crArgPos($1.posicion);
-                    TIPO_ARG argB = crArgPos($3.posicion);
-                    TIPO_ARG argDest = crArgPos($$.posicion);
-                    /*Diferencia*/
-                    emite(EDIF, argA , argB, argDest);
-                    /*Normalizar a 1*/
-                    emite(EIGUAL,argDest,crArgEnt(0),crArgEtq(si+2));
-                    emite(EASIG ,crArgEnt(1), crArgNul() ,argDest);
-                    /*dest = 1 si argA == argB*/
-                    if( $2 == EX_SETONEQU)
-                    { emite(EDIF ,crArgEnt(1), argDest ,argDest); }
+
+                    emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.posicion));
+                    emite($2, crArgPos($1.posicion), crArgPos($3.posicion), crArgEtq(si+2));
+                    emite(EASIG, crArgEnt(0), crArgNul(), crArgPos($$.posicion));
                    }
                   ;  
 
@@ -425,23 +418,10 @@ expresionRelacional : expresionAditiva
                     }
                     /**/
                     $$.posicion = creaVarTemp();
-                    TIPO_ARG argA = crArgPos($1.posicion);
-                    TIPO_ARG argB = crArgPos($3.posicion);
-                    TIPO_ARG argDest = crArgPos($$.posicion);
-                    /**/
-                    int c3dop = GOTOS; //valor por defecto
-                    switch($2)
-                    {
-                        case EX_SETONGREATER: c3dop = EMAY; break;
-                        case EX_SETONLESS: c3dop = EMEN ; break;
-                        case EX_SETONEQUGREAT: c3dop = EMAYEQ; break;
-                        case EX_SETONEQULESS: c3dop = EMENEQ; break;
-                    }
-                    /**/
-                    emite(c3dop,argA,argB,crArgEtq(si+3));
-                    emite(EASIG,crArgEnt(0),crArgNul(),argDest);
-                    emite(GOTOS,crArgNul(),crArgNul(),crArgEtq(si+2));
-                    emite(EASIG,crArgEnt(1),crArgNul(),argDest);
+                    
+                    emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.posicion));
+                    emite($2, crArgPos($1.posicion), crArgPos($3.posicion), crArgEtq(si+2));
+                    emite(EASIG, crArgEnt(0), crArgNul(), crArgPos($$.posicion));
                  }
                     ;
 
@@ -492,13 +472,11 @@ expresionUnaria : expresionSufija
                     else if (($2.tipo == T_LOGICO && $1 == EX_NOT))
                     {
                         $$.posicion = creaVarTemp();
-                        TIPO_ARG argDest = crArgPos($$.posicion);
-                        TIPO_ARG argA = crArgPos($2.posicion);
-                        emite(EIGUAL,argA,crArgEnt(0),crArgEtq(si+3));
-                        emite(EASIG,crArgEnt(0),crArgNul(),argDest);
-                        emite(GOTOS,crArgNul(),crArgNul(),crArgEtq(si+2));
-                        emite(EASIG,crArgEnt(1),crArgNul(),argDest);
-                        /**/
+                        
+                        emite(EASIG, crArgEnt(0), crArgNul(), crArgPos($$.posicion));
+                        emite(EDIST, crArgPos($2.posicion), crArgEnt(0), crArgEtq(si+2));
+                        emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.posicion));
+                        
                         $$.tipo = $2.tipo;
                     }
                     else
@@ -659,14 +637,14 @@ operadorLogico : AND_ { $$ = EX_AND; }
                | OR_  { $$ = EX_OR ; }
                ; 
 
-operadorIgualdad : IGUAL_ { $$ = EX_SETONEQU; }
-                 | DIFERENTE_ { $$ = EX_SETONDIFF; }
+operadorIgualdad : IGUAL_ { $$ = EIGUAL; }
+                 | DIFERENTE_ { $$ = EDIST; }
                  ;   
 
-operadorRelacional : MAYOR_ { $$ = EX_SETONGREATER; }
-                   | MENOR_ { $$ = EX_SETONLESS; }
-                   | MAYORIGUAL_ { $$ = EX_SETONEQUGREAT; }
-                   | MENORIGUAL_ { $$ = EX_SETONEQULESS; }
+operadorRelacional : MAYOR_ { $$ = EMAY; }
+                   | MENOR_ { $$ = EMEN; }
+                   | MAYORIGUAL_ { $$ = EMAYEQ; }
+                   | MENORIGUAL_ { $$ = EMENEQ; }
                    ; 
 
 operadorAditivo : MAS_ { $$ = ESUM; }
