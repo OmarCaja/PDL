@@ -363,7 +363,7 @@ expresionLogica : expresionIgualdad
                         yyerror("Error de tipos en \"expresion logica\"");
                         $$.tipo = T_ERROR;
                     }
-                    /**/
+
                     $$.posicion = creaVarTemp();
 
                     if($2 == EX_AND)
@@ -374,9 +374,9 @@ expresionLogica : expresionIgualdad
                     {
                         emite(ESUM, crArgPos($1.posicion), crArgPos($3.posicion), crArgPos($$.posicion));
                         emite(EMENEQ, crArgPos($$.posicion), crArgEnt(1), crArgEtq(si+2));
-                        emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.posicion))
+                        emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.posicion));
                     }
-                 }
+                }
                 ;
 
 expresionIgualdad : expresionRelacional
